@@ -22,6 +22,22 @@ runcmd:
 
 %{ endif }
 
+%{ if image == "opensuse154o" }
+# WORKAROUND: install latest libzypp to prevent signature verification errors
+runcmd:
+  - zypper addrepo -G -e http://download.opensuse.org/update/leap/15.4/oss/ os_update
+  - zypper addrepo -G -e http://download.opensuse.org/repositories/systemsmanagement:/Uyuni:/Stable:/openSUSE_Leap_15-Uyuni-Client-Tools/openSUSE_Leap_15.0/ client_tools_tmp
+  - zypper ref
+  - zypper up --allow-vendor-change --no-confirm libzypp
+%{ if install_salt_bundle }
+  - zypper in --allow-vendor-change --no-confirm venv-salt-minion
+%{ else }
+  - zypper up --allow-vendor-change --no-confirm salt-minion
+%{ endif }
+  - zypper removerepo --all
+
+%{ endif }
+
 %{ if image == "sles15"}
 zypper:
   repos:
@@ -224,6 +240,8 @@ apt:
 runcmd:
   # WORKAROUND: cloud-init in Ubuntu 22.04 does not take care of the following
   - echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+  # WORKAROUND: something in terraform is still using ssh-rsa
+  - echo "PubkeyAcceptedKeyTypes=+ssh-rsa" >> /etc/ssh/sshd_config
   # WORKAROUND: disable IPv6 until we have it in Provo
   - echo 'Acquire::ForceIPv4 "true";' > /etc/apt/apt.conf.d/99force-ipv4
   - systemctl restart sshd
@@ -383,7 +401,7 @@ runcmd:
   - echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
   - echo "PubkeyAcceptedKeyTypes=+ssh-rsa" >> /etc/ssh/sshd_config
   - systemctl restart sshd
-  # Work around security release/updates does not have a Release file
+  # WORKAROUND: security release/updates does not have a Release file
   - sed -i "s|bullseye/updates|bullseye-security|" /etc/apt/sources.list
 
 packages: ["venv-salt-minion"]
