@@ -1,5 +1,5 @@
 include:
-  - server
+  - server_containerized
 
 {% if grains.get('skip_changelog_import') %}
 
@@ -8,7 +8,7 @@ package_import_skip_changelog_reposync:
     - name: /etc/rhn/rhn.conf
     - text: package_import_skip_changelog = 1
     - require:
-      - sls: server
+      - sls: server_containerized
 
 {% endif %}
 
@@ -18,7 +18,7 @@ disable_download_tokens:
     - name: /etc/rhn/rhn.conf
     - text: java.salt_check_download_tokens = false
     - require:
-      - sls: server
+      - sls: server_containerized
 {% endif %}
 
 {%- set mirror_hostname = grains.get('server_mounted_mirror') if grains.get('server_mounted_mirror') else grains.get('mirror') %}
@@ -49,7 +49,7 @@ rhn_conf_from_dir:
     - name: /etc/rhn/rhn.conf
     - text: server.susemanager.fromdir = /mirror
     - require:
-      - sls: server
+      - sls: server_containerized
       - mount: mirror_directory
 
 {% elif salt["grains.get"]("smt") %}
@@ -59,7 +59,7 @@ rhn_conf_mirror:
     - name: /etc/rhn/rhn.conf
     - text: server.susemanager.mirror = {{ salt["grains.get"]("smt") }}
     - require:
-      - sls: server
+      - sls: server_containerized
 
 {% endif %}
 
@@ -70,7 +70,7 @@ rhn_conf_prometheus:
     - name: /etc/rhn/rhn.conf
     - text: prometheus_monitoring_enabled = true
     - require:
-      - sls: server
+      - sls: server_containerized
 
 {% endif %}
 
@@ -81,38 +81,7 @@ rhn_conf_forward_reg:
     - name: /etc/rhn/rhn.conf
     - text: server.susemanager.forward_registration = 0
     - require:
-      - sls: server
-
-{% endif %}
-
-{% if grains.get('c3p0_connection_timeout') | default(true, false) %}
-
-rhn_conf_c3p0_connection_timeout:
-  file.append:
-    - name: /etc/rhn/rhn.conf
-    - text: hibernate.c3p0.unreturnedConnectionTimeout = {{ grains.get('c3p0_connection_timeout') | default(14400, true) }}
-    - require:
-      - sls: server
-
-{% endif %}
-
-{% if grains.get('c3p0_connection_debug') | default(false, true) %}
-
-rhn_conf_c3p0_connection_debug:
-  file.append:
-    - name: /etc/rhn/rhn.conf
-    - text: hibernate.c3p0.debugUnreturnedConnectionStackTraces = true
-    - require:
-      - sls: server
-
-rhn_conf_c3p0_connection_debug_log:
-  file.line:
-    - name: /srv/tomcat/webapps/rhn/WEB-INF/classes/log4j2.xml
-    - content: '    <Logger name="com.mchange.v2.resourcepool.BasicResourcePool" level="info" />'
-    - after: "<Loggers>"
-    - mode: ensure
-    - require:
-      - sls: server
+      - sls: server_containerized
 
 {% endif %}
 

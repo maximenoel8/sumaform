@@ -448,6 +448,16 @@ install_recommends:
 
 {% set release = grains.get('osmajorrelease', None)|int() %}
 
+{# Soon this key will be used for all non-suse repos. When it happens, replace galaxy_key with this #}
+suse_el9_key:
+  file.managed:
+    - name: /tmp/suse_el9.key
+    - source: salt://default/gpg_keys/suse_el9.key
+  cmd.wait:
+    - name: rpm --import /tmp/suse_el9.key
+    - watch:
+      - file: suse_el9_key
+
 galaxy_key:
   file.managed:
     - name: /tmp/galaxy.key
@@ -456,6 +466,15 @@ galaxy_key:
     - name: rpm --import /tmp/galaxy.key
     - watch:
       - file: galaxy_key
+
+suse_res7_key:
+  file.managed:
+    - name: /tmp/suse_res7.key
+    - source: salt://default/gpg_keys/suse_res7.key
+  cmd.wait:
+    - name: rpm --import /tmp/suse_res7.key
+    - watch:
+      - file: suse_res7_key
 {% if 'uyuni-master' in grains.get('product_version', '') or 'uyuni-released' in grains.get('product_version', '') or 'uyuni-pr' in grains.get('product_version', '') %}
 uyuni_key:
   file.managed:
@@ -518,16 +537,11 @@ tools_pool_repo:
     - refresh: True
     - require:
       - cmd: galaxy_key
-
-
-suse_res7_key:
-  file.managed:
-    - name: /tmp/suse_res7.key
-    - source: salt://default/gpg_keys/suse_res7.key
-  cmd.wait:
-    - name: rpm --import /tmp/suse_res7.key
-    - watch:
-      - file: suse_res7_key
+    {% if release >= 9 %}
+      - cmd: suse_el9_key
+    {% else %}
+      - cmd: suse_res7_key
+    {% endif %}
 
 suse_res6_key:
   file.managed:
@@ -567,6 +581,11 @@ tools_update_repo:
     - refresh: True
     - require:
       - cmd: galaxy_key
+    {% if release >= 9 %}
+      - cmd: suse_el9_key
+    {% else %}
+      - cmd: suse_res7_key
+    {% endif %}
 
 {% elif 'head' in grains.get('product_version') | default('', true) %}
 
@@ -582,6 +601,11 @@ tools_update_repo:
     - refresh: True
     - require:
       - cmd: galaxy_key
+    {% if release >= 9 %}
+      - cmd: suse_el9_key
+    {% else %}
+      - cmd: suse_res7_key
+    {% endif %}
 
 {% elif 'uyuni-master' in grains.get('product_version', '') or 'uyuni-pr' in grains.get('product_version', '') %}
 
@@ -618,6 +642,11 @@ tools_update_repo:
     - refresh: True
     - require:
       - cmd: galaxy_key
+    {% if release >= 9 %}
+      - cmd: suse_el9_key
+    {% else %}
+      - cmd: suse_res7_key
+    {% endif %}
 {% endif %}
 {% endif %}
 

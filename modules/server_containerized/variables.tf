@@ -7,8 +7,28 @@ variable "name" {
   type        = string
 }
 
+variable "roles" {
+  description = "List of the host roles"
+  default     = []
+}
+
+variable "runtime" {
+  description = "Where to run the containers. One of podman or k3s"
+  default = "podman"
+}
+
+variable "container_repository" {
+  description = "Where to find the server container images. Uses the released ones per default."
+  default = ""
+}
+
+variable "helm_chart_url" {
+  description = "Where to get the helm chart from. Uses the released one by default."
+  default = ""
+}
+
 variable "product_version" {
-  description = "One of: 4.0-nightly, 4.0-released, 4.1-released, 4.1-nightly, 4.2-released, 4.2-nightly, 4.3-released, 4.3-nightly, 4.3-beta, head, test, uyuni-master, uyuni-released"
+  description = "One of: uyuni-master, uyuni-released"
   type        = string
 }
 
@@ -45,11 +65,6 @@ variable "iss_slave" {
 variable "register_to_server" {
   description = "name of another Server to register to, eg module.<SERVER_NAME>.configuration.hostname"
   default     = null
-}
-
-variable "disable_auto_bootstrap" {
-  description = "disable the default bootstrap mgr-create-bootstrap-repo call after product synchronization"
-  default     = false
 }
 
 variable "auto_register" {
@@ -142,6 +157,11 @@ variable "disable_download_tokens" {
   default     = true
 }
 
+variable "disable_auto_bootstrap" {
+  description = "disable the default bootstrap mgr-create-bootstrap-repo call after product synchronization"
+  default     = false
+}
+
 variable "use_os_released_updates" {
   description = "Apply all updates from SUSE Linux Enterprise repos"
   default     = false
@@ -149,6 +169,11 @@ variable "use_os_released_updates" {
 
 variable "from_email" {
   description = "email address used as sender for emails"
+  default     = null
+}
+
+variable "traceback_email" {
+  description = "recipient email address that will receive errors during usage"
   default     = null
 }
 
@@ -192,9 +217,14 @@ variable "install_salt_bundle" {
   default     = false
 }
 
-variable "traceback_email" {
-  description = "recipient email address that will receive errors during usage"
-  default     = null
+variable "quantity" {
+  description = "number of hosts like this one"
+  default     = 1
+}
+
+variable "grains" {
+  description = "custom grain map to be added to this host's configuration"
+  default     = {}
 }
 
 variable "swap_file_size" {
@@ -220,24 +250,36 @@ variable "ipv6" {
   }
 }
 
-variable "image" {
-  description = "Leave default for automatic selection or specify an OS supported by the specified product version"
-  default     = "default"
+variable "connect_to_base_network" {
+  description = "true if you want a card connected to the main network, see README_ADVANCED.md"
+  default     = true
 }
 
-variable "repository_disk_size" {
-  description = "Size of an aditional disk for /var/spacewalk partition, defined in GiB"
-  default     = 0
-}
-
-variable "saltapi_tcpdump" {
-  description = "If set to true, all network operations of salt-api are logged to /tmp/ with tcpdump."
+variable "connect_to_additional_network" {
+  description = "true if you want a card connected to the additional network (if any), see README_ADVANCED.md"
   default     = false
 }
 
+variable "image" {
+  description = "An image name, e.g. sles12sp4 or opensuse154o"
+  type        = string
+  default     = "opensuse154o"
+}
+
+variable "provision" {
+  description = "Indicates whether servers should be provisioned or not"
+  type        = bool
+  default     = true
+}
+
 variable "provider_settings" {
-  description = "Map of provider-specific settings, see the backend-specific README file"
+  description = "Map of provider-specific settings, see the modules/libvirt/README.md"
   default     = {}
+}
+
+variable "additional_disk_size" {
+  description = "Size of an aditional disk, defined in GiB"
+  default     = null
 }
 
 variable "volume_provider_settings" {
@@ -245,52 +287,13 @@ variable "volume_provider_settings" {
   default     = {}
 }
 
+variable "overwrite_fqdn" {
+  description = "use the specified FQDN as hostname for the system"
+  type        = string
+  default     = null
+}
+
 variable "server_mounted_mirror" {
   description = "hostname of a mounted mirror in the server (to get packages from it)"
   default     = null
-}
-
-variable "forward_registration" {
-  description = "Forward client registrations to SCC"
-  default     = false
-}
-
-variable "server_registration_code" {
-  description = "SUMA SCC registration code to enable the SLES and SUMA repositories for server"
-  default     = null
-}
-
-variable "accept_all_ssl_protocols" {
-  description = "Turn to true to force Apache to accept a greater range of protocol versions"
-  default     = false
-}
-
-variable "login_timeout" {
-  description = "How long the webUI login session cookie is valid"
-  default     = null
-}
-
-variable "db_configuration" {
-  description = "Database configuration. by default setup to localhost"
-  default = {
-    local              = "true"
-    hostname           = "localhost"
-    port               = "5432"
-  }
-}
-
-variable "c3p0_connection_timeout" {
-  description = "c3p0 connections will be closed after this timeout"
-  # WORKAROUND: this is causing problems in the testsuite, disable it for now
-  default     = false
-}
-
-variable "c3p0_connection_debug" {
-  description = "log additional info regarding leaked c3p0 connections"
-  default     = false
-}
-
-variable "quantity" {
-  description = "number of hosts like this one"
-  default     = 1
 }
