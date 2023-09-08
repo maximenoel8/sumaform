@@ -1,5 +1,4 @@
 include:
-  - server_containerized.tools
   - server_containerized.install_common
 
 k3s_install:
@@ -8,12 +7,6 @@ k3s_install:
     - env:
       - INSTALL_K3S_EXEC: "--tls-san={{ grains.get('fqdn') }}" 
     - unless: systemctl is-active k3s
-
-k3s_traefik_config:
-  file.managed:
-    - name: /var/lib/rancher/k3s/server/manifests/k3s-traefik-config.yaml
-    - source: salt://server_containerized/k3s-traefik-config.yaml
-    - makedirs: true
 
 helm_install:
   pkg.installed:
