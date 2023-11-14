@@ -1,8 +1,10 @@
 {%- set mirror_hostname = grains.get('server_mounted_mirror') if grains.get('server_mounted_mirror') else grains.get('mirror') %}
 
-uyuni_tools:
+uyuni-tools:
   pkg.installed:
-    - name: uyuni-tools
+    - pkgs:
+      - uyuniadm
+      - uyunictl
     
 {% if mirror_hostname %}
 
