@@ -1,5 +1,8 @@
 include:
   - scc.server
+  {% if 'build_image' and 'paygo' not in grains.get('product_version') | default('', true) %}
+  - repos
+  {% endif %}
   - server.additional_disk
   - repos
   - server.firewall

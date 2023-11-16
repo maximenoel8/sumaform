@@ -1,4 +1,3 @@
-{% if 'paygo' not in grains.get('product_version') | default('', true) %}
 include:
   - repos.disable_local
   - repos.vendor
@@ -29,4 +28,3 @@ refresh_repos:
 # WORKAROUND: see github:saltstack/salt#10852
 {{ sls }}_nop:
   test.nop: []
-{% endif %}
