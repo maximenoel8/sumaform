@@ -263,6 +263,7 @@ resource "null_resource" "host_salt_configuration" {
         reset_ids                     = true
         ipv6                          = var.ipv6
         data_disk_device              = contains(var.roles, "server") || contains(var.roles, "proxy") || contains(var.roles, "mirror") || contains(var.roles, "jenkins") ? local.data_disk_device : null
+        server_username               = contains(var.image, "paygo") && contains(var.roles, "server") && length(aws_instance.instance) > 0 ? aws_instance.instance[*].id[0] : var.grains["server_username"]
       },
     var.grains))
     destination = "/tmp/grains"

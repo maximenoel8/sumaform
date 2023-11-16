@@ -59,7 +59,7 @@ module "server" {
     }
     download_private_ssl_key       = var.download_private_ssl_key
     smt                            = var.smt
-    server_username                = var.product_version == "paygo" && length(module.server.configuration["ids"]) > 0 ? module.server.configuration["ids"][0] : var.server_username
+    server_username                = var.server_username
     server_password                = var.server_password
     allow_postgres_connections     = var.allow_postgres_connections
     unsafe_postgres                = var.unsafe_postgres
