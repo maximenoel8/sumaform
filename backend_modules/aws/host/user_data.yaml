@@ -100,7 +100,7 @@ packages: ["salt-minion"]
 
 %{ endif }
 
-%{ if image == "sles15sp5-paygo") }
+%{ if image == "sles15sp5-paygo" }
 
 packages: ["salt-minion"]
 
