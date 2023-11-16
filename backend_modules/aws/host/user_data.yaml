@@ -100,7 +100,7 @@ packages: ["salt-minion"]
 
 %{ endif }
 
-%{ if regex(image, "paygo") }
+%{ if image ~= "paygo") }
 
 packages: ["salt-minion"]
 
