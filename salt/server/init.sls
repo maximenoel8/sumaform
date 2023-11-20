@@ -4,7 +4,6 @@ include:
   - repos
   {% endif %}
   - server.additional_disk
-  - repos
   - server.firewall
   {% if grains.get('db_configuration')['local'] %}
   - server.postgres
