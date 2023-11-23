@@ -100,12 +100,11 @@ packages: ["salt-minion"]
 
 %{ endif }
 
-%{ if image == "sles15sp5-paygo" }
-
+%{ if image == "sles15sp5-paygo" || image == "sles12sp5-paygo" || image == "sap15sp5-paygo" }
 packages: ["salt-minion"]
 
 %{ endif }
-
+ 
 %{ if image == "sles12sp3"}
 zypper:
   repos:
