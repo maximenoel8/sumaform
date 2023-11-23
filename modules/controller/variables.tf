@@ -749,6 +749,12 @@ variable "is_using_scc_repositories" {
   default     = false
 }
 
+variable "server_instance_id" {
+  description = "Server instance ID"
+  default     = null
+}
+
+
 variable "nested_vm_host" {
   description = "Hostname for a nested VM if it is used, see README_TESTING.md"
   type        = string

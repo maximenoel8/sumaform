@@ -63,6 +63,7 @@ module "controller" {
     is_using_paygo_server     = var.is_using_paygo_server
     is_using_build_image      = var.is_using_build_image
     is_using_scc_repositories = var.is_using_scc_repositories
+    server_instance_id        = var.server_instance_id
     container_runtime         = lookup(var.server_configuration, "runtime", null)
 
     sle12paygo_minion    = length(var.sle12paygo_minion_configuration["hostnames"]) > 0 ? var.sle12paygo_minion_configuration["hostnames"][0] : null
