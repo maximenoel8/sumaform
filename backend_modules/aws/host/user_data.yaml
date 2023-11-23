@@ -87,6 +87,8 @@ runcmd:
   - zypper in --allow-vendor-change --no-confirm salt-minion
   - zypper removerepo --all
 
+packages: ["salt-minion"]
+
 %{ endif }
 
 %{ if image == "sles15sp4o" || image == "sles15sp5o" }
@@ -101,7 +103,7 @@ packages: ["salt-minion"]
 %{ endif }
 
 %{ if image == "sles15sp5-paygo" || image == "sles12sp5-paygo" || image == "sap15sp5-paygo" }
-packages: ["salt-minion"]
+packages: ["venv-salt-minion"]
 
 %{ endif }
  
