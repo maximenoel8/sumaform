@@ -753,7 +753,7 @@ variable "nested_vm_host" {
   description = "Hostname for a nested VM if it is used, see README_TESTING.md"
   type        = string
   default     = "min-nested"
-}is_using_build_image
+}
 
 variable "nested_vm_mac" {
   description = "MAC address for a nested VM if it is used, see README_TESTING.md"
