@@ -13,7 +13,6 @@ variable "images" {
     "4.3-pr"         = "sles15sp4o"
     "4.3-beta"       = "sles15sp4o"
     "4.3-build_image"= "sles15sp4o"
-    "4.3-paygo"      = "suma-server-43-paygo"
     "head"           = "sles15sp4o"
     "uyuni-master"   = "opensuse155o"
     "uyuni-released" = "opensuse154o"
@@ -96,6 +95,7 @@ module "server" {
   provider_settings        = var.provider_settings
   additional_disk_size     = var.repository_disk_size
   volume_provider_settings = var.volume_provider_settings
+  is_paygo_instance        = var.is_paygo_instance
 }
 
 output "configuration" {
