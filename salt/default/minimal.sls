@@ -5,7 +5,7 @@ include:
   - default.network
   - default.firewall
   - default.avahi
-  {% if 'build_image' and 'paygo' not in grains.get('product_version')%}
+  {% if 'build_image' and 'paygo' not in grains.get('product_version') | default('', true) %}
   - repos
   {% else %}
   - repos.testsuite
