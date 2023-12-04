@@ -31,7 +31,10 @@ add_sle_module_suse_manager_proxy:
 {% endif %}
 
 {% if '4.3' in grains['product_version'] %}
-register_suse_manager_proxy_with_scc:
+register_suse_manager_proxy_code_to_scc:
+   cmd.run:
+     - name: SUSEConnect --url https://scc.suse.com -r {{ grains.get("proxy_registration_code") }}
+enable_proxy_product:
    cmd.run:
      - name: SUSEConnect --url https://scc.suse.com -r {{ grains.get("proxy_registration_code") }} -p SUSE-Manager-Proxy/4.3/x86_64
 add_sle_module_basesystem:
