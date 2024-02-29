@@ -2,7 +2,7 @@
 
 variable "images" {
   default = {
-    "head"           = "sles15sp4o"
+    "head"           = "slemicro55o"
     "uyuni-master"   = "opensuse155o"
     "uyuni-released" = "opensuse155o"
     "uyuni-pr"       = "opensuse155o"
@@ -28,16 +28,19 @@ module "server_containerized" {
   ipv6                          = var.ipv6
   connect_to_base_network       = true
   connect_to_additional_network = false
-  image                    = var.image == "default" || var.product_version == "head" ? var.images[var.product_version] : var.image
+  image                         = var.image == "default" ? var.images[var.product_version] : var.image
   provision                     = var.provision
   provider_settings             = var.provider_settings
-  additional_disk_size          = var.additional_disk_size
+  main_disk_size                = var.main_disk_size
+  additional_disk_size          = var.repository_disk_size
+  second_additional_disk_size   = var.database_disk_size
   volume_provider_settings      = var.volume_provider_settings
 
   grains = {
     product_version        = var.product_version
     container_runtime      = var.runtime
     container_repository   = var.container_repository
+    container_tag          = var.container_tag
     helm_chart_url         = var.helm_chart_url
     cc_username            = var.base_configuration["cc_username"]
     cc_password            = var.base_configuration["cc_password"]
@@ -50,6 +53,9 @@ module "server_containerized" {
     java_salt_debugging            = var.java_salt_debugging
     from_email                     = var.from_email
     traceback_email                = var.traceback_email
+    main_disk_size                 = var.main_disk_size
+    repository_disk_size           = var.repository_disk_size
+    database_disk_size             = var.database_disk_size
     skip_changelog_import          = var.skip_changelog_import
     create_first_user              = var.create_first_user
     mgr_sync_autologin             = var.mgr_sync_autologin
@@ -59,16 +65,18 @@ module "server_containerized" {
     publish_private_ssl_key        = var.publish_private_ssl_key
     auto_accept                    = var.auto_accept
     disable_auto_bootstrap         = var.disable_auto_bootstrap
+    large_deployment               = var.large_deployment
   }
 }
 
 output "configuration" {
   value = {
-    id              = length(module.server_containerized.configuration["ids"]) > 0 ? module.server_containerized.configuration["ids"][0] : null
-    hostname        = length(module.server_containerized.configuration["hostnames"]) > 0 ? module.server_containerized.configuration["hostnames"][0] : null
-    product_version = var.product_version
-    username        = var.server_username
-    password        = var.server_password
-    runtime         = var.runtime
+    id                 = length(module.server_containerized.configuration["ids"]) > 0 ? module.server_containerized.configuration["ids"][0] : null
+    hostname           = length(module.server_containerized.configuration["hostnames"]) > 0 ? module.server_containerized.configuration["hostnames"][0] : null
+    product_version    = var.product_version
+    username           = var.server_username
+    password           = var.server_password
+    runtime            = var.runtime
+    first_user_present = var.create_first_user
   }
 }

@@ -14,11 +14,14 @@ emailFrom: {{ grains.get("from_email") | default('galaxy-noise@suse.de', true) }
 {%- if grains.get('container_repository') %}
 image: {{ grains.get('container_repository') }}/server
 {% endif %}
+{%- if grains.get('container_tag') %}
+tag: {{ grains.get('container_tag') }}
+{% endif %}
 {%- set mirror_hostname = grains.get('server_mounted_mirror') if grains.get('server_mounted_mirror') else grains.get('mirror') %}
 {%- if mirror_hostname %}
 mirrorPath: /srv/mirror
 {% endif -%}
-{% set helm_chart_default = 'oci://registry.opensuse.org/uyuni/server' %}
+{% set helm_chart_default = 'oci://registry.opensuse.org/uyuni/server-helm' %}
 helm:
   uyuni:
     chart: {{ grains.get("helm_chart_url") | default(helm_chart_default, true) }}
@@ -33,3 +36,15 @@ podman:
 debug:
   java: true
 {%- endif %}
+
+{% if grains.get('create_first_user') %}
+{% set server_username = grains.get('server_username') | default('admin', true) %}
+{% set server_password = grains.get('server_password') | default('admin', true) %}
+organization: SUSE
+admin:
+  password: {{ server_password }}
+  login: {{ server_username }}
+  firstName: Administrator
+  lastName: Administrator
+  email: galaxy-noise@suse.de
+{% endif %}

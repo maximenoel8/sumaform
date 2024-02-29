@@ -14,10 +14,8 @@ export SERVER="{{ grains.get('server') }}"
 export VIRTHOST_KVM_PASSWORD="linux" {% else %}# no KVM host defined {% endif %}
 {% if grains.get('monitoring_server') | default(false, true) %}export MONITORING_SERVER="{{ grains.get('monitoring_server') }}"{% else %}# no monitoring server defined {% endif %}
 
-# Salt bundle test specific hosts
-# At the moment we only need/support one nested VM in the test suite
-{% if grains.get('nested_vm_host') %}export MIN_NESTED="{{ grains.get('nested_vm_host') }}.{{ grains.get('domain') }}"{% else %}# no nested VM hostname defined {%- endif %}
-{% if grains.get('nested_vm_mac') %}export MAC_MIN_NESTED="{{ grains.get('nested_vm_mac') }}"{% else %}# no nested VM MAC address defined {%- endif %}
+# Migration to Salt bundle test specific host
+{% if grains.get('salt_migration_minion') | default(false, true) %}export SALT_MIGRATION_MINION="{{ grains.get('salt_migration_minion') }}" {% else %}# no Salt migration minion defined {% endif %}
 
 # base goodies
 {% if grains.get('additional_network') | default(false, true) %}export PRIVATENET="{{ grains.get('additional_network') }}" {% else %}# no private network defined {% endif %}
@@ -65,6 +63,8 @@ export VIRTHOST_KVM_PASSWORD="linux" {% else %}# no KVM host defined {% endif %}
 {% if grains.get('slemicro54_sshminion') | default(false, true) %}export SLEMICRO54_SSHMINION="{{ grains.get('slemicro54_sshminion') }}" {% else %}# no SLEMICRO54 ssh minion defined {% endif %}
 {% if grains.get('slemicro55_minion') | default(false, true) %}export SLEMICRO55_MINION="{{ grains.get('slemicro55_minion') }}" {% else %}# no SLEMICRO55 minion defined {% endif %}
 {% if grains.get('slemicro55_sshminion') | default(false, true) %}export SLEMICRO55_SSHMINION="{{ grains.get('slemicro55_sshminion') }}" {% else %}# no SLEMICRO55 ssh minion defined {% endif %}
+{% if grains.get('alma8_minion') | default(false, true) %}export ALMA8_MINION="{{ grains.get('alma8_minion') }}" {% else %}# no ALMA8 minion defined {% endif %}
+{% if grains.get('alma8_sshminion') | default(false, true) %}export ALMA8_SSHMINION="{{ grains.get('alma8_sshminion') }}" {% else %}# no ALMA8 ssh minion defined {% endif %}
 {% if grains.get('alma9_minion') | default(false, true) %}export ALMA9_MINION="{{ grains.get('alma9_minion') }}" {% else %}# no ALMA9 minion defined {% endif %}
 {% if grains.get('alma9_sshminion') | default(false, true) %}export ALMA9_SSHMINION="{{ grains.get('alma9_sshminion') }}" {% else %}# no ALMA9 ssh minion defined {% endif %}
 {% if grains.get('centos7_minion') | default(false, true) %}export CENTOS7_MINION="{{ grains.get('centos7_minion') }}" {% else %}# no CENTOS7 minion defined {% endif %}
@@ -102,8 +102,8 @@ export VIRTHOST_KVM_PASSWORD="linux" {% else %}# no KVM host defined {% endif %}
 {% if grains.get('opensuse154arm_sshminion') | default(false, true) %}export OPENSUSE154ARM_SSHMINION="{{ grains.get('opensuse154arm_sshminion') }}" {% else %}# no OPENSUSE154ARM ssh minion defined {% endif %}
 {% if grains.get('opensuse155arm_minion') | default(false, true) %}export OPENSUSE155ARM_MINION="{{ grains.get('opensuse155arm_minion') }}" {% else %}# no OPENSUSE155ARM minion defined {% endif %}
 {% if grains.get('opensuse155arm_sshminion') | default(false, true) %}export OPENSUSE155ARM_SSHMINION="{{ grains.get('opensuse155arm_sshminion') }}" {% else %}# no OPENSUSE155ARM ssh minion defined {% endif %}
-{% if grains.get('sle15sp3s390_minion') | default(false, true) %}export SLE15SP3S390_MINION="{{ grains.get('sle15sp3s390_minion') }}" {% else %}# no SLE15SP3S390 minion defined {% endif %}
-{% if grains.get('sle15sp3s390_sshminion') | default(false, true) %}export SLE15SP3S390_SSHMINION="{{ grains.get('sle15sp3s390_sshminion') }}" {% else %}# no SLE15SP3S390 ssh minion defined {% endif %}
+{% if grains.get('sle15sp5s390_minion') | default(false, true) %}export SLE15SP5S390_MINION="{{ grains.get('sle15sp5s390_minion') }}" {% else %}# no SLE15SP5S390 minion defined {% endif %}
+{% if grains.get('sle15sp5s390_sshminion') | default(false, true) %}export SLE15SP5S390_SSHMINION="{{ grains.get('sle15sp5s390_sshminion') }}" {% else %}# no SLE15SP5S390 ssh minion defined {% endif %}
 
 # various test suite settings
 export GITPROFILES="{{ grains.get('git_profiles_repo') }}"
@@ -119,6 +119,7 @@ export PROVIDER="{{ grains.get('provider') }}"
 {% if 'build_image' not in grains.get('product_version') | default('', true) %}export IS_USING_BUILD_IMAGE="{{ grains.get('is_using_build_image') }}" {% endif %}
 export IS_USING_PAYGO_SERVER="{{ grains.get('is_using_paygo_server') }}"
 export IS_USING_SCC_REPOSITORIES="{{ grains.get('is_using_scc_repositories') }}"
+export CATCH_TIMEOUT_MESSAGE="{{ grains.get('catch_timeout_message') }}"
 export SERVER_INSTANCE_ID="{{ grains.get('server_instance_id') }}"
 
 #### Generate certificates for Google Chrome

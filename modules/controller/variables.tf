@@ -470,6 +470,20 @@ variable "rhel9_minion_configuration" {
   }
 }
 
+variable "alma8_minion_configuration" {
+  description = "use module.<ALMA8_MINION>.configuration, see main.tf.libvirt-testsuite.example"
+  default = {
+    hostnames = []
+  }
+}
+
+variable "alma8_sshminion_configuration" {
+  description = "use module.<ALMA8_SSHMINION>.configuration, see main.tf.libvirt-testsuite.example"
+  default = {
+    hostnames = []
+  }
+}
+
 variable "alma9_minion_configuration" {
   description = "use module.<ALMA9_MINION>.configuration, see main.tf.libvirt-testsuite.example"
   default = {
@@ -663,15 +677,22 @@ variable "opensuse155arm_sshminion_configuration" {
   }
 }
 
-variable "sle15sp3s390_minion_configuration" {
-  description = "use module.<SLE15SP3S390_MINION>.configuration"
+variable "sle15sp5s390_minion_configuration" {
+  description = "use module.<SLE15SP5S390_MINION>.configuration"
   default = {
     hostnames = []
   }
 }
 
-variable "sle15sp3s390_sshminion_configuration" {
-  description = "use module.<SLE15SP3S390_SSHMINION>.configuration"
+variable "sle15sp5s390_sshminion_configuration" {
+  description = "use module.<SLE15SP5S390_SSHMINION>.configuration"
+  default = {
+    hostnames = []
+  }
+}
+
+variable "salt_migration_minion_configuration" {
+  description = "use module.<SALT_MIGRATION_MINION>.configuration"
   default = {
     hostnames = []
   }
@@ -755,6 +776,11 @@ variable "no_mirror" {
   default     = false
 }
 
+variable "catch_timeout_message" {
+  description = "Enable the mechanism to catch the timeout message shown by a server overloaded"
+  default     = false
+}
+
 variable "is_using_paygo_server" {
   description = "Specify to controller that server image is a paygo image"
   default     = false
@@ -773,17 +799,4 @@ variable "is_using_scc_repositories" {
 variable "server_instance_id" {
   description = "Server instance ID"
   default     = null
-}
-
-
-variable "nested_vm_host" {
-  description = "Hostname for a nested VM if it is used, see README_TESTING.md"
-  type        = string
-  default     = "min-nested"
-}
-
-variable "nested_vm_mac" {
-  description = "MAC address for a nested VM if it is used, see README_TESTING.md"
-  type        = string
-  default     = ""
 }

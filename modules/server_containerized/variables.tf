@@ -22,13 +22,18 @@ variable "container_repository" {
   default = ""
 }
 
+variable "container_tag" {
+  description = "The container image tag to use."
+  default = ""
+}
+
 variable "helm_chart_url" {
   description = "Where to get the helm chart from. Uses the released one by default."
   default = ""
 }
 
 variable "product_version" {
-  description = "One of: uyuni-master, uyuni-released"
+  description = "One of: uyuni-master, uyuni-released, head, uyuni-pr"
   type        = string
 }
 
@@ -287,9 +292,19 @@ variable "provider_settings" {
   default     = {}
 }
 
-variable "additional_disk_size" {
-  description = "Size of an aditional disk, defined in GiB"
-  default     = null
+variable "main_disk_size" {
+  description = "Size of main disk, defined in GiB"
+  default     = 200
+}
+
+variable "repository_disk_size" {
+  description = "Size of an additional disk for /var/spacewalk partition, defined in GiB"
+  default     = 0
+}
+
+variable "database_disk_size" {
+  description = "Size of an additional disk for /var/lib/pgsql partition, defined in GiB"
+  default     = 0
 }
 
 variable "volume_provider_settings" {
@@ -297,13 +312,13 @@ variable "volume_provider_settings" {
   default     = {}
 }
 
-variable "overwrite_fqdn" {
-  description = "use the specified FQDN as hostname for the system"
-  type        = string
-  default     = null
-}
-
 variable "server_mounted_mirror" {
   description = "hostname of a mounted mirror in the server (to get packages from it)"
   default     = null
+}
+
+variable "large_deployment" {
+  description = "set up for a deployment with a great number of clients"
+  type        = bool
+  default     = false
 }

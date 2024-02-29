@@ -24,6 +24,16 @@ sle_module_hpc_repo_updates:
   pkgrepo.managed:
     - baseurl: http://{{ grains.get("mirror") | default("download.suse.de/ibs", true) }}/SUSE/Updates/SLE-Module-HPC/{{ repo_path }}/x86_64/update/
     - refresh: True
+
+containers_pool_repo:
+  pkgrepo.managed:
+    - baseurl: http://{{ grains.get("mirror") | default("download.suse.de/ibs", true) }}/SUSE/Products/SLE-Module-Containers/{{ repo_path }}/x86_64/product/
+    - refresh: True
+
+containers_updates_repo:
+  pkgrepo.managed:
+    - baseurl: http://{{ grains.get("mirror") | default("download.suse.de/ibs", true) }}/SUSE/Updates/SLE-Module-Containers/{{ repo_path }}/x86_64/update/
+    - refresh: True
 {% endif %}
 
 {% if grains['osrelease_info'][1] >= 3 %}
@@ -48,7 +58,7 @@ salt_testing_repo:
 
 install_salt_testsuite:
   pkg.installed:
-    - name: python3-salt-testsuite
+    - pkgs: ["python3-salt-testsuite", "python3-salt-test"]
     - require:
       - pkgrepo: salt_testsuite_dependencies_repo
       - pkgrepo: salt_testing_repo

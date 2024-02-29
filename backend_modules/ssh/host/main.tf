@@ -28,6 +28,7 @@ resource "null_resource" "provisioning" {
         hostname                  = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}"
         roles                     = var.roles
         use_os_released_updates   = var.use_os_released_updates
+        install_salt_bundle       = var.install_salt_bundle
         additional_repos          = var.additional_repos
         additional_repos_only     = var.additional_repos_only
         additional_certs          = var.additional_certs
@@ -86,6 +87,7 @@ resource "null_resource" "provisioning" {
         testsuite                 = var.base_configuration["testsuite"]
         roles                     = var.roles
         use_os_released_updates   = var.use_os_released_updates
+        install_salt_bundle       = var.install_salt_bundle
         additional_repos          = var.additional_repos
         additional_repos_only     = var.additional_repos_only
         additional_certs          = var.additional_certs
@@ -101,6 +103,7 @@ resource "null_resource" "provisioning" {
         reset_ids                     = true
         ipv6                          = var.ipv6
         data_disk_device              = contains(var.roles, "suse_manager_server") || contains(var.roles, "suse_manager_proxy") || contains(var.roles, "mirror") || contains(var.roles, "jenkins") ? "vdb" : null
+        second_data_disk_device       = contains(var.roles, "suse_manager_server") || contains(var.roles, "suse_manager_proxy") || contains(var.roles, "mirror") || contains(var.roles, "jenkins") ? "vdc" : null
       },
       var.grains))
     destination = "/tmp/grains"

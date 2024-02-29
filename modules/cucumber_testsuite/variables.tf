@@ -38,7 +38,22 @@ variable "name_prefix" {
 
 variable "images" {
   description = "list of images to be uploaded to the libvirt host, leave default for all"
-  default     = ["centos7o", "opensuse154o", "opensuse155o", "rocky8o", "rocky9o", "sles12sp4o", "sles12sp5o", "sles15sp3o", "sles15sp4o", "ubuntu2004o", "ubuntu2204o"]
+  default     = ["centos7o", "opensuse155o", "rocky8o", "rocky9o", "sles12sp4o", "sles12sp5o", "sles15sp3o", "sles15sp4o", "ubuntu2004o", "ubuntu2204o", "suma43VM-ign"]
+}
+
+variable "main_disk_size" {
+  description = "Size of main disk, defined in GiB"
+  default     = 200
+}
+
+variable "repository_disk_size" {
+  description = "Size of an additional disk for /var/spacewalk partition, defined in GiB"
+  default     = 0
+}
+
+variable "database_disk_size" {
+  description = "Size of an additional disk for /var/lib/pgsql partition, defined in GiB"
+  default     = 0
 }
 
 variable "mirror" {
@@ -69,7 +84,7 @@ variable "host_settings" {
 
 // server
 variable "product_version" {
-  description = "One of: 4.0-nightly, 4.0-released, 4.1-nightly, 4.1-released, 4.2-nightly, 4.2-released, 4.3-nightly, 4.3-released, 4.3-pr, 4.3-beta, head, test, uyuni-master, uyuni-released, uyuni-pr"
+  description = "One of: 4.2-nightly, 4.2-released, 4.3-nightly, 4.3-released, 4.3-pr, 4.3-beta, 4.3-VM-nightly, 4.3-VM-released, head, uyuni-master, uyuni-released, uyuni-pr"
   type        = string
 }
 
@@ -150,19 +165,12 @@ variable "login_timeout" {
   default     = null
 }
 
-variable "nested_vm_host" {
-  description = "Hostname for a nested VM if it is used, see README_TESTING.md"
-  type        = string
-  default     = "min-nested"
-}
-
-variable "nested_vm_mac" {
-  description = "MAC address for a nested VM if it is used, see README_TESTING.md"
-  type        = string
-  default     = ""
-}
-
 variable "container_server" {
   description = "true to run the server in containers"
+  default = false
+}
+
+variable "container_proxy" {
+  description = "true to run the proxy in containers"
   default = false
 }

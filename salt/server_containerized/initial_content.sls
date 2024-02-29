@@ -6,51 +6,16 @@ include:
 {% set server_username = grains.get('server_username') | default('admin', true) %}
 {% set server_password = grains.get('server_password') | default('admin', true) %}
 
-spacecmd_config:
-  cmd.run:
-    - name: mgrctl exec 'mkdir -p /root/.spacecmd; echo -e "[spacecmd]\\nserver={{ grains.get('fqdn') }}" >/root/.spacecmd/config'
-    - require:
-      - pkg: uyuni-tools
-      - sls: server_containerized.install_{{ container_runtime }}
-
 {% if grains.get('create_first_user') %}
-
-wait_for_tomcat:
-  http.wait_for_successful_query:
-    - method: GET
-    - name: https://{{ grains.get("fqdn") }}/
-    - verify_ssl: False
-    - status: 200
-    - require:
-      - sls: server_containerized.install_{{ container_runtime }}
-
-create_first_user:
-  http.wait_for_successful_query:
-    - method: POST
-    - name: https://{{ grains.get("fqdn") }}/rhn/newlogin/CreateFirstUser.do
-    - status: 200
-    - data: "submitted=true&\
-             orgName=SUSE&\
-             login={{ server_username }}&\
-             desiredpassword={{ server_password }}&\
-             desiredpasswordConfirm={{ server_password }}&\
-             email=galaxy-noise%40suse.de&\
-             firstNames=Administrator&\
-             lastName=Administrator"
-    - verify_ssl: False
-    - unless: mgrctl exec "satwho | grep -x {{ server_username }} server_username"
-    - require:
-      - http: wait_for_tomcat
-      - pkg: uyuni-tools
-
 # set password in case user already existed with a different password
 first_user_set_password:
   cmd.run:
     - name: mgrctl exec 'echo -e "{{ server_password }}\\n{{ server_password }}" | satpasswd -s {{ server_username }}'
     - require:
-      - http: create_first_user
+      - cmd: mgradm_install
+{% if grains['osfullname'] != 'SLE Micro' %}
       - pkg: uyuni-tools
-
+{% endif %}
 {% endif %}
 
 {% if grains.get('mgr_sync_autologin') %}
@@ -60,7 +25,7 @@ mgr_sync_configuration_file:
     - name: /root/.mgr-sync
     - replace: false
     - require:
-      - http: create_first_user
+      - cmd: mgradm_install
 
 mgr_sync_automatic_authentication:
   file.replace:
@@ -82,7 +47,7 @@ wait_for_mgr_sync:
     - use_vt: True
     - template: jinja
     - require:
-      - http: create_first_user
+      - cmd: mgradm_install
 
 scc_data_refresh:
   cmd.run:
@@ -118,7 +83,7 @@ create_empty_channel:
     - name: mgrctl exec "spacecmd -u {{ server_username }} -p {{ server_password }} -- softwarechannel_create --name testchannel -l testchannel -a x86_64"
     - unless: mgrctl exec "spacecmd -u {{ server_username }} -p {{ server_password }} softwarechannel_list | grep -x testchannel"
     - require:
-      - http: create_first_user
+      - cmd: mgradm_install
 {% endif %}
 
 {% if grains.get('create_sample_activation_key') %}

@@ -8,7 +8,7 @@ variable "name" {
 }
 
 variable "product_version" {
-  description = "One of: 4.0-released, 4.0-nightly, 4.1-released, 4.1-nightly, 4.2-released, 4.2-nightly, 4.3-released, 4.3-nightly, 4.3-pr, 4.3-beta, head, test, uyuni-master, uyuni-released, uyuni-pr"
+  description = "One of: 4.2-released, 4.2-nightly, 4.2-build_image, 4.3-released, 4.3-nightly, 4.3-pr, 4.3-beta, 4.3-build_image, 4.3-VM-nightly, 4.3-VM-released, head, uyuni-master, uyuni-released, uyuni-pr"
   type        = string
 }
 
@@ -117,6 +117,11 @@ variable "ipv6" {
 variable "image" {
   description = "Leave default for automatic selection or specify an OS supported by the specified product version"
   default     = "default"
+}
+
+variable "main_disk_size" {
+  description = "Size of main disk, defined in GiB"
+  default     = 200
 }
 
 variable "repository_disk_size" {

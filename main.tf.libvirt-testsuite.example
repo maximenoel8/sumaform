@@ -20,7 +20,7 @@ module "cucumber_testsuite" {
   # for more information on product_version values
   # you should use the same version here as in git_repo below
   # if you work on Uyuni you should use e.g. uyuni-master here and uyuni as git_repo below
-  # if you work on SUMA you should use e.g. 4.3-nightly, 4.3-released or head and spacewalk as git_repo below
+  # if you work on SUMA you should use e.g. 4.3-nightly, 4.3-released, 4.3-VM-nightly, 4.3-VM-released, or head and spacewalk as git_repo below
   product_version = "uyuni-master"
 
   # SUSE SCC credentials
@@ -58,6 +58,9 @@ module "cucumber_testsuite" {
   git_password = "nogit"
   branch = "master"
 
+  # Required to select a container server in the testsuite
+  container_server = true
+
   # In case you use an authentication registry
   auth_registry = "registry.mgr.suse.de:5000/cucutest"
   auth_registry_username = ""
@@ -86,8 +89,17 @@ module "cucumber_testsuite" {
     controller = {
       name = "controller"
     }
-    server = {
+    server_containerized = {
       name = "server"
+     
+      # Uncomment to run the container on k3s rather than podman
+      # runtime = "k3s"
+
+      # Override where to get the containers from
+      # container_repository = "registry.opensuse.org/systemsmanagement/uyuni/master/containers/uyuni"
+
+      # Override where to get the helm chart from
+      # helm_chart_url = "oci://registry.opensuse.org/systemsmanagement/uyuni/master/charts/uyuni/server-helm"
     }
     proxy = {
       name = "proxy"

@@ -4,7 +4,7 @@ include:
 {% if grains['use_avahi'] and grains.get('osmajorrelease', None) != None %}
 
 # TODO: remove the following state when fix to bsc#1163683 is applied to all the SLES <= SLES15SP4
-{% if grains['osfullname'] == 'SLES' and grains['osrelease'] != '15.5' %}
+{% if grains['osfullname'] == 'SLES' and grains['osrelease'] != '15.5' and grains['osrelease'] != '15.4' %}
 custom_avahi_repo:
   pkgrepo.managed:
     - humanname: custom_avahi_repo
@@ -24,8 +24,6 @@ custom_avahi_repo:
     - baseurl: http://download.opensuse.org/repositories/systemsmanagement:/sumaform:/tools:/avahi:/0.7/SLE_15_SP2/
     {% elif grains['osrelease'] == '15.3' %}
     - baseurl: http://download.opensuse.org/repositories/systemsmanagement:/sumaform:/tools:/avahi:/0.7/SLE_15_SP3/
-    {% elif grains['osrelease'] == '15.4' %}
-    - baseurl: http://download.opensuse.org/repositories/systemsmanagement:/sumaform:/tools:/avahi:/0.8/15.4/
     {% endif %}
     - enabled: True
     - refresh: True
@@ -41,11 +39,8 @@ dbus_enable_service:
 {% endif %}
 
 # TODO: replace 'pkg.latest' with 'pkg.installed' when fix to bsc#1163683 is applied to all the SLES versions we use
+{% if not (grains['os_family'] == 'Suse' and grains['osfullname'] == 'SLE Micro') %}
 avahi_pkg:
-{% if grains['os_family'] == 'Suse' and grains['osfullname'] == 'SLE Micro'  %}
-  cmd.run:
-    - name: transactional-update -c package up avahi avahi-lang libavahi-common3 libavahi-core7
-{% else %}
   pkg.latest:
     - pkgs:
       {% if grains['os_family'] == 'Debian' %}
@@ -67,6 +62,8 @@ avahi_pkg:
       - libavahi-core7
       {% endif %}
       {% endif %}
+    - requires:
+      - pkgrepo: os_pool_repo
 {% endif %}
 
 # WORKAROUND: watch does not really work with Salt 2016.11

@@ -106,18 +106,22 @@ variable "provider_settings" {
   default     = {}
 }
 
+variable "main_disk_size" {
+  description = "Size of main disk, defined in GiB"
+  default     = 200
+}
+
 variable "additional_disk_size" {
-  description = "Size of an aditional disk, defined in GiB"
-  default     = null
+  description = "Size of an additional disk, defined in GiB"
+  default     = 0
+}
+
+variable "second_additional_disk_size" {
+  description = "Size of a second additional disk, defined in GiB"
+  default     = 0
 }
 
 variable "volume_provider_settings" {
   description = "Map of volume-provider-specific settings, see the backend-specific README file"
   default     = {}
-}
-
-variable "overwrite_fqdn" {
-  description = "use the specified FQDN as hostname for the system"
-  type        = string
-  default     = null
 }

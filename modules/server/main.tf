@@ -1,10 +1,5 @@
 variable "images" {
   default = {
-    "4.0-released"   = "sles15sp1o"
-    "4.0-nightly"    = "sles15sp1o"
-    "4.1-released"   = "sles15sp2o"
-    "4.1-nightly"    = "sles15sp2o"
-    "4.1-build_image"= "sles15sp2o"
     "4.2-released"   = "sles15sp3o"
     "4.2-nightly"    = "sles15sp3o"
     "4.2-build_image"= "sles15sp3o"
@@ -14,6 +9,8 @@ variable "images" {
     "4.3-beta"       = "sles15sp4o"
     "4.3-build_image"= "sles15sp4o"
     "4.3-paygo"      = "suma-server-43-paygo"
+    "4.3-VM-nightly"         = "suma43VM-ign"
+    "4.3-VM-released"= "suma43VM-ign"
     "head"           = "sles15sp4o"
     "uyuni-master"   = "opensuse155o"
     "uyuni-released" = "opensuse155o"
@@ -81,7 +78,10 @@ module "server" {
     from_email                     = var.from_email
     traceback_email                = var.traceback_email
     saltapi_tcpdump                = var.saltapi_tcpdump
+    main_disk_size                 = var.main_disk_size
     repository_disk_size           = var.repository_disk_size
+    database_disk_size             = var.database_disk_size
+    repository_disk_use_cloud_setup= var.repository_disk_use_cloud_setup
     forward_registration           = var.forward_registration
     server_registration_code       = var.server_registration_code
     accept_all_ssl_protocols       = var.accept_all_ssl_protocols
@@ -89,13 +89,15 @@ module "server" {
     db_configuration               = var.db_configuration
     c3p0_connection_timeout        = var.c3p0_connection_timeout
     c3p0_connection_debug          = var.c3p0_connection_debug
+    large_deployment               = var.large_deployment
   }
 
 
-  image                    = var.image == "default" || var.product_version == "head" ? var.images[var.product_version] : var.image
-  provider_settings        = var.provider_settings
-  additional_disk_size     = var.repository_disk_size
-  volume_provider_settings = var.volume_provider_settings
+  image                           = var.image == "default" || var.product_version == "head" ? var.images[var.product_version] : var.image
+  provider_settings               = var.provider_settings
+  additional_disk_size            = var.repository_disk_size
+  second_additional_disk_size     = var.database_disk_size
+  volume_provider_settings        = var.volume_provider_settings
 }
 
 output "configuration" {

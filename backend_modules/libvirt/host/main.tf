@@ -1,8 +1,18 @@
 locals {
+  overwrite_fqdn = lookup(var.provider_settings, "overwrite_fqdn", "")
   resource_name_prefix = "${var.base_configuration["name_prefix"]}${var.name}"
   manufacturer = lookup(var.provider_settings, "manufacturer", "Intel")
   product      = lookup(var.provider_settings, "product", "Genuine")
   x86_64_v2_images = ["almalinux9o", "libertylinux9o", "oraclelinux9o", "rocky9o"]
+  gpg_keys = [
+    for key in fileset("salt/default/gpg_keys/", "*.key"): {
+        path = "/etc/gpg_keys/${key}"
+        content = filebase64("salt/default/gpg_keys/${key}")
+        encoding = "b64"
+        owner = "root:root"
+        permissions = "0700"
+    }
+  ]
   provider_settings = merge({
     memory          = 1024
     vcpu            = 1
@@ -16,7 +26,10 @@ locals {
     contains(var.roles, "server_containerized") ? { memory = 4096, vcpu = 2 } : {},
     contains(var.roles, "server") && lookup(var.base_configuration, "testsuite", false) ? { memory = 8192, vcpu = 4 } : {},
     contains(var.roles, "server_containerized") && lookup(var.base_configuration, "testsuite", false) ? { memory = 8192, vcpu = 4 } : {},
+    contains(var.roles, "proxy") ? { memory = 2048, vcpu = 2 } : {},
+    contains(var.roles, "proxy_containerized") ? { memory = 2048, vcpu = 2 } : {},
     contains(var.roles, "proxy") && lookup(var.base_configuration, "testsuite", false) ? { memory = 2048, vcpu = 2 } : {},
+    contains(var.roles, "proxy_containerized") && lookup(var.base_configuration, "testsuite", false) ? { memory = 2048, vcpu = 2 } : {},
     contains(var.roles, "pxe_boot")? { memory = 2048} : {},
     contains(var.roles, "mirror") ? { memory = 1024 } : {},
     contains(var.roles, "build_host") ? { vcpu = 2 } : {},
@@ -39,6 +52,10 @@ data "template_file" "user_data" {
     use_mirror_images   = var.base_configuration["use_mirror_images"]
     mirror              = var.base_configuration["mirror"]
     install_salt_bundle = var.install_salt_bundle
+    container_server    = contains(var.roles, "server_containerized")
+    container_proxy     = contains(var.roles, "proxy_containerized")
+    testsuite           = lookup(var.base_configuration, "testsuite", false)
+    files               = jsonencode(local.gpg_keys)
   }
 }
 
@@ -57,16 +74,24 @@ resource "libvirt_volume" "main_disk" {
   name             = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}-main-disk"
   base_volume_name = "${var.base_configuration["use_shared_resources"] ? "" : var.base_configuration["name_prefix"]}${var.image}"
   pool             = var.base_configuration["pool"]
-  size             = 214748364800
+  size             = var.main_disk_size * 1024 * 1024 * 1024
   count            = var.quantity
 }
 
 resource "libvirt_volume" "data_disk" {
   name  = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}-data-disk"
   // needs to be converted to bytes
-  size  = (var.additional_disk_size == null? 0: var.additional_disk_size) * 1024 * 1024 * 1024
+  size  = var.additional_disk_size * 1024 * 1024 * 1024
   pool  = lookup(var.volume_provider_settings, "pool", var.base_configuration["pool"])
-  count = var.additional_disk_size == null? 0 : var.additional_disk_size > 0 ? var.quantity : 0
+  count = var.additional_disk_size > 0 ? var.quantity : 0
+}
+
+resource "libvirt_volume" "database_disk" {
+  name  = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}-database-disk"
+  // needs to be converted to bytes
+  size  = var.second_additional_disk_size * 1024 * 1024 * 1024
+  pool  = lookup(var.volume_provider_settings, "pool", var.base_configuration["pool"])
+  count = var.second_additional_disk_size > 0 ? var.quantity : 0
 }
 
 resource "libvirt_cloudinit_disk" "cloudinit_disk" {
@@ -101,7 +126,8 @@ resource "libvirt_domain" "domain" {
   dynamic "disk" {
     for_each = concat(
       length(libvirt_volume.main_disk) == var.quantity ? [{"volume_id" : libvirt_volume.main_disk[count.index].id}] : [],
-      length(libvirt_volume.data_disk) == var.quantity ? [{"volume_id" : libvirt_volume.data_disk[count.index].id}] : []
+      length(libvirt_volume.data_disk) == var.quantity ? [{"volume_id" : libvirt_volume.data_disk[count.index].id}] : [],
+      length(libvirt_volume.database_disk) == var.quantity ? [{"volume_id" : libvirt_volume.database_disk[count.index].id}] : []
     )
     content {
       volume_id = disk.value.volume_id
@@ -202,6 +228,14 @@ resource "null_resource" "provisioning" {
     host     = libvirt_domain.domain[count.index].network_interface[0].addresses[0]
     user     = "root"
     password = "linux"
+    // ssh connection through a bastion host
+    bastion_host        = lookup(var.provider_settings, "bastion_host", var.base_configuration["bastion_host"])
+    bastion_host_key    = lookup(var.provider_settings, "bastion_host_key", var.base_configuration["bastion_host_key"])
+    bastion_port        = lookup(var.provider_settings, "bastion_port", var.base_configuration["bastion_port"])
+    bastion_user        = lookup(var.provider_settings, "bastion_user", var.base_configuration["bastion_user"])
+    bastion_password    = lookup(var.provider_settings, "bastion_password", var.base_configuration["bastion_password"])
+    bastion_private_key = lookup(var.provider_settings, "bastion_private_key", var.base_configuration["bastion_private_key"])
+    bastion_certificate = lookup(var.provider_settings, "bastion_certificate", var.base_configuration["bastion_certificate"])
   }
 
   provisioner "file" {
@@ -212,7 +246,7 @@ resource "null_resource" "provisioning" {
   provisioner "file" {
     content = yamlencode(merge(
       {
-        hostname                  = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}"
+        hostname                  = local.overwrite_fqdn != "" ? split(".", local.overwrite_fqdn)[0] : "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}"
         domain                    = var.base_configuration["domain"]
         use_avahi                 = var.base_configuration["use_avahi"]
         additional_network        = var.base_configuration["additional_network"]
@@ -236,7 +270,8 @@ resource "null_resource" "provisioning" {
         connect_to_additional_network = var.connect_to_additional_network
         reset_ids                     = true
         ipv6                          = var.ipv6
-        data_disk_device              = contains(var.roles, "server") || contains(var.roles, "proxy") || contains(var.roles, "mirror") || contains(var.roles, "jenkins") ? "vdb" : null
+        data_disk_device              = contains(var.roles, "server") || contains(var.roles, "server_containerized") || contains(var.roles, "proxy") || contains(var.roles, "mirror") || contains(var.roles, "jenkins") ? "vdb" : null
+        second_data_disk_device       = contains(var.roles, "server") || contains(var.roles, "server_containerized") || contains(var.roles, "proxy") || contains(var.roles, "mirror") || contains(var.roles, "jenkins") ? "vdc" : null
         provider                      = "libvirt"
       },
       var.grains))
@@ -266,7 +301,7 @@ output "configuration" {
   depends_on = [libvirt_domain.domain, null_resource.provisioning]
   value = {
     ids       = libvirt_domain.domain[*].id
-    hostnames = [for value_used in libvirt_domain.domain : "${value_used.name}.${var.base_configuration["domain"]}"]
+    hostnames = [for value_used in libvirt_domain.domain : local.overwrite_fqdn != "" ? local.overwrite_fqdn : "${value_used.name}.${var.base_configuration["domain"]}"]
     macaddrs  = [for value_used in libvirt_domain.domain : value_used.network_interface[0].mac if length(value_used.network_interface) > 0]
     ipaddrs  = [for value_used in libvirt_domain.domain : value_used.network_interface[0].addresses if length(value_used.network_interface) > 0]
   }

@@ -1,10 +1,5 @@
 variable "images" {
   default = {
-    "4.0-released"   = "sles15sp1o"
-    "4.0-nightly"    = "sles15sp1o"
-    "4.1-released"   = "sles15sp2o"
-    "4.1-nightly"    = "sles15sp2o"
-    "4.1-build_image"= "sles15sp2o"
     "4.2-released"   = "sles15sp3o"
     "4.2-nightly"    = "sles15sp3o"
     "4.2-build_image"= "sles15sp3o"
@@ -13,6 +8,8 @@ variable "images" {
     "4.3-pr"         = "sles15sp4o"
     "4.3-beta"       = "sles15sp4o"
     "4.3-build_image"= "sles15sp4o"
+    "4.3-VM-nightly"         = "sles15sp4o"
+    "4.3-VM-released"= "sles15sp4o"
     "head"           = "sles15sp4o"
     "uyuni-master"   = "opensuse155o"
     "uyuni-released" = "opensuse155o"
@@ -53,6 +50,7 @@ module "proxy" {
     server_password           = var.server_configuration["password"]
     generate_bootstrap_script = var.generate_bootstrap_script
     publish_private_ssl_key   = var.publish_private_ssl_key
+    main_disk_size            = var.main_disk_size
     repository_disk_size      = var.repository_disk_size
     proxy_registration_code   = var.proxy_registration_code
     accept_all_ssl_protocols  = var.accept_all_ssl_protocols

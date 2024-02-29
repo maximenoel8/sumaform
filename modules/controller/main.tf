@@ -1,12 +1,12 @@
 variable "testsuite-branch" {
   default = {
-    "4.1-released"   = "Manager-4.1"
-    "4.1-nightly"    = "Manager-4.1"
     "4.2-released"   = "Manager-4.2"
     "4.2-nightly"    = "Manager-4.2"
     "4.3-released"   = "Manager-4.3"
     "4.3-nightly"    = "Manager-4.3"
     "4.3-pr"         = "Manager-4.3"
+    "4.3-VM-released"= "Manager-4.3"
+    "4.3-VM-nightly"         = "Manager-4.3"
     "4.3-beta"       = "master"
     "head"           = "master"
     "uyuni-master"   = "master"
@@ -33,8 +33,6 @@ module "controller" {
     cc_username  = var.base_configuration["cc_username"]
     cc_password  = var.base_configuration["cc_password"]
     git_username = var.git_username
-    nested_vm_host = var.nested_vm_host
-    nested_vm_mac = var.nested_vm_mac
     git_password = var.git_password
     git_repo     = var.git_repo
     branch       = var.branch == "default" ? var.testsuite-branch[var.server_configuration["product_version"]] : var.branch
@@ -65,6 +63,7 @@ module "controller" {
     is_using_scc_repositories = var.is_using_scc_repositories
     server_instance_id        = var.server_instance_id
     container_runtime         = lookup(var.server_configuration, "runtime", null)
+    catch_timeout_message     = var.catch_timeout_message
 
     sle12sp5_paygo_minion    = length(var.sle12sp5_paygo_minion_configuration["hostnames"]) > 0 ? var.sle12sp5_paygo_minion_configuration["hostnames"][0] : null
     sle15sp5_paygo_minion    = length(var.sle15sp5_paygo_minion_configuration["hostnames"]) > 0 ? var.sle15sp5_paygo_minion_configuration["hostnames"][0] : null
@@ -110,6 +109,8 @@ module "controller" {
     centos7_minion       = length(var.centos7_minion_configuration["hostnames"]) > 0 ? var.centos7_minion_configuration["hostnames"][0] : null
     centos7_sshminion    = length(var.centos7_sshminion_configuration["hostnames"]) > 0 ? var.centos7_sshminion_configuration["hostnames"][0] : null
     centos7_client       = length(var.centos7_client_configuration["hostnames"]) > 0 ? var.centos7_client_configuration["hostnames"][0] : null
+    alma8_minion         = length(var.alma8_minion_configuration["hostnames"]) > 0 ? var.alma8_minion_configuration["hostnames"][0] : null
+    alma8_sshminion      = length(var.alma8_sshminion_configuration["hostnames"]) > 0 ? var.alma8_sshminion_configuration["hostnames"][0] : null
     alma9_minion         = length(var.alma9_minion_configuration["hostnames"]) > 0 ? var.alma9_minion_configuration["hostnames"][0] : null
     alma9_sshminion      = length(var.alma9_sshminion_configuration["hostnames"]) > 0 ? var.alma9_sshminion_configuration["hostnames"][0] : null
     liberty9_minion      = length(var.liberty9_minion_configuration["hostnames"]) > 0 ? var.liberty9_minion_configuration["hostnames"][0] : null
@@ -144,12 +145,12 @@ module "controller" {
     opensuse154arm_sshminion = length(var.opensuse154arm_sshminion_configuration["hostnames"]) > 0 ? var.opensuse154arm_sshminion_configuration["hostnames"][0] : null
     opensuse155arm_minion    = length(var.opensuse155arm_minion_configuration["hostnames"]) > 0 ? var.opensuse155arm_minion_configuration["hostnames"][0] : null
     opensuse155arm_sshminion = length(var.opensuse155arm_sshminion_configuration["hostnames"]) > 0 ? var.opensuse155arm_sshminion_configuration["hostnames"][0] : null
-    sle15sp3s390_minion    = length(var.sle15sp3s390_minion_configuration["hostnames"]) > 0 ? var.sle15sp3s390_minion_configuration["hostnames"][0] : null
-    sle15sp3s390_sshminion = length(var.sle15sp3s390_sshminion_configuration["hostnames"]) > 0 ? var.sle15sp3s390_sshminion_configuration["hostnames"][0] : null
+    sle15sp5s390_minion    = length(var.sle15sp5s390_minion_configuration["hostnames"]) > 0 ? var.sle15sp5s390_minion_configuration["hostnames"][0] : null
+    sle15sp5s390_sshminion = length(var.sle15sp5s390_sshminion_configuration["hostnames"]) > 0 ? var.sle15sp5s390_sshminion_configuration["hostnames"][0] : null
+    salt_migration_minion = length(var.salt_migration_minion_configuration["hostnames"]) > 0 ? var.salt_migration_minion_configuration["hostnames"][0] : null
   }
 
-
-  image   = "opensuse154o"
+  image   = "opensuse155o"
   provider_settings = var.provider_settings
 }
 

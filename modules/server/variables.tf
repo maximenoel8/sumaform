@@ -8,7 +8,7 @@ variable "name" {
 }
 
 variable "product_version" {
-  description = "One of: 4.0-nightly, 4.0-released, 4.1-released, 4.1-nightly, 4.2-released, 4.2-nightly, 4.3-released, 4.3-nightly, 4.3-pr, 4.3-beta, head, test, uyuni-master, uyuni-released"
+  description = "One of: 4.2-released, 4.2-nightly, 4.2-build_image, 4.3-released, 4.3-nightly, 4.3-pr, 4.3-beta, 4.3-build_image, 4.3-paygo, 4.3-VM-nightly, 4.3-VM-released, head, uyuni-master, uyuni-released, uyuni-pr"
   type        = string
 }
 
@@ -235,9 +235,24 @@ variable "image" {
   default     = "default"
 }
 
+variable "main_disk_size" {
+  description = "Size of main disk, defined in GiB"
+  default     = 200
+}
+
 variable "repository_disk_size" {
-  description = "Size of an aditional disk for /var/spacewalk partition, defined in GiB"
+  description = "Size of an additional disk for /var/spacewalk partition, defined in GiB"
   default     = 0
+}
+
+variable "database_disk_size" {
+  description = "Size of an additional disk for /var/lib/pgsql partition, defined in GiB"
+  default     = 0
+}
+
+variable "repository_disk_use_cloud_setup" {
+  description = "Use cloud tool suma-storage to setup additional disk for repository and database data"
+  default = false
 }
 
 variable "saltapi_tcpdump" {
@@ -297,6 +312,12 @@ variable "c3p0_connection_timeout" {
 
 variable "c3p0_connection_debug" {
   description = "log additional info regarding leaked c3p0 connections"
+  default     = false
+}
+
+variable "large_deployment" {
+  description = "set up for a deployment with a great number of clients"
+  type        = bool
   default     = false
 }
 

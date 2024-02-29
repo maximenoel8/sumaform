@@ -1,12 +1,11 @@
-{% if 'server_containerized' in grains.get('roles')  %}
+{% if 'server_containerized' in grains.get('roles') %}
 
-systemsmanagement_Uyuni_Master_ContainerUtils:
-    pkgrepo.managed:
-    - baseurl: http://{{ grains.get("mirror") | default("downloadcontent.opensuse.org", true) }}/repositories/systemsmanagement:/Uyuni:/Master:/ContainerUtils/openSUSE_Leap_15.5/
-    - refresh: True
+{%- if 'uyuni' in grains.get('product_version', 'uyuni-master') %}
+include:
+  - repos.server_containerizedUyuni
+{%- endif %}
 
 {% endif %}
-
 
 # WORKAROUND: see github:saltstack/salt#10852
 {{ sls }}_nop:

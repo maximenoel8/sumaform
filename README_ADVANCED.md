@@ -9,16 +9,16 @@ Some modules have a `product_version` variable that determines the software prod
 
 Legal values for released software are:
 
-- `4.1-released`   (latest released Maintenance Update for SUSE Manager 4.1 and Tools)
 - `4.2-released`   (latest released Maintenance Update for SUSE Manager 4.2 and Tools)
 - `4.3-released`   (latest released Maintenance Update for SUSE Manager 4.3 and Tools)
+- `4.3-VM-released` (latest released Maintenance Update for SUSE Manager 4.3Virtual Machine)
 - `uyuni-released` (latest released version for Uyuni Server, Proxy and Tools, from systemsmanagement:Uyuni:Stable)
 
 Legal values for work-in-progress software are:
 
-- `4.1-nightly` (corresponds to the Build Service project Devel:Galaxy:Manager:4.1)
 - `4.2-nightly` (corresponds to the Build Service project Devel:Galaxy:Manager:4.2)
 - `4.3-nightly` (corresponds to the Build Service project Devel:Galaxy:Manager:4.3)
+- `4.3-VM-nightly`       (corresponds to the Virtual Image in the Build Service project Devel:Galaxy:Manager:4.3)
 - `4.3-beta`    (corresponds to the Build Service project SUSE:SLE-15-SP4:Update:Products:Manager43)
 - `head` (corresponds to the Build Service project Devel:Galaxy:Manager:Head, for `server` and `proxy`only works with SLE15SP4 image)
 - `uyuni-master` (corresponds to the Build Service project systemsmanagement:Uyuni:Master, for `server` and `proxy` only works with openSUSE Leap image)
@@ -479,7 +479,7 @@ module "server" {
   base_configuration = module.base.configuration
 
   name = "server"
-  product_version = "4.1-nightly"
+  product_version = "4.3-nightly"
 }
 
 module "proxy" {
@@ -487,7 +487,7 @@ module "proxy" {
   base_configuration = module.base.configuration
 
   name = "proxy"
-  product_version = "4.1-nightly"
+  product_version = "4.3-nightly"
   server_configuration = module.server.configuration
 }
 
@@ -865,7 +865,7 @@ To disable the swap file, set its size to 0.
 
 ## Additional disk on Server or Proxy
 
-In case the default disk size for those machines is not enough for the amount of products you want to synchronize, you can add an additional disk which will mount the first volume in `/var/spacewalk` with size `repository_disk_size`. This additional disk will be created in the pool specified by `data_pool`.
+In case the default disk size for those machines is not enough for the amount of products you want to synchronize, you can add an additional disk which will mount the first volume in `/var/spacewalk` with size `repository_disk_size` and the second volume in `/var/lib/pgsql` with size `database_disk_size`. This additional disk will be created in the pool specified by `data_pool`.
 
 An example follows:
 
@@ -876,11 +876,100 @@ module "server" {
   product_version = "4.2-nightly"
   name = "server"
   repository_disk_size = 500
+  database_disk_size = 50
   volume_provider_settings = {
     data_pool = "default"
   }
 }
 ```
+
+## Large deployments
+
+In the case of the Build Validation test suite, or when trying to reproduce situations with a large number of clients, it is advised to use `large_deployment` option. This option is inspired by the documentation at https://documentation.suse.com/suma/4.3/en/suse-manager/specialized-guides/large-deployments/tuning.html, and it will apply the following settings on the server:
+
+```
+### /etc/rhn/rhn.conf
+taskomatic.com.redhat.rhn.taskomatic.task.MinionActionExecutor.parallel_threads = 3
+hibernate.c3p0.max_size = 50
+
+### /etc/tomcat/server.xml
+changed `maxThreads` to 256
+
+### /var/lib/pgsql/data/postgresql.conf
+max_connections = 450
+work_mem = 10MB
+```
+
+An example follows:
+
+```hcl
+module "server" {
+   ...
+   large_deployment = true
+   ...
+}
+```
+
+## Using a different FQDN
+
+Normally, the fully qualified domain name (FQDN) is derived from `name` variable. However, some providers, like AWS cloud provider, impose a naming scheme that does not always match this mechanism. You may also want a name for libvirt that differs from the hostname part of the FQDN. The `overwrite_fqdn` variable allows the FQDN to diverge from the value normally derived from the name.
+
+An AWS example is:
+
+```hcl
+module "cucumber_testsuite" {
+  source = "./modules/cucumber_testsuite"
+  ...
+  host_settings = {
+    ...
+    server = {
+      provider_settings = {
+        instance_type = "m6a.xlarge"
+        volume_size = "100"
+        private_ip = "172.16.3.6"
+        overwrite_fqdn = "uyuni-master-srv.sumaci.aws"
+      }
+    }
+    ...
+  }
+  ...
+}
+```
+
+A libvirt example is:
+
+```hcl
+module "opensuse155arm-minion" {
+  source = "./modules/minion"
+  ...
+  name = "nue-min-opensuse155arm"
+  ...
+  provider_settings = {
+    ...
+    overwrite_fqdn   = "suma-bv-43-min-opensuse155arm.mgr.suse.de"
+    ...
+  }
+  ...
+}
+```
+
+Note the extra `nue-` in the name. With those settings, we have in libvirt:
+
+```bash
+suma-arm:~ # virsh list
+ Id   Name                                   State
+----------------------------------------------------
+ ...
+ 11   suma-bv-43-nue-min-opensuse154arm      running
+```
+
+and inside the VM:
+
+```bash
+# hostname -f
+suma-bv-43-min-opensuse154arm.mgr.suse.de
+```
+
 
 ## Debugging facilities
 
@@ -891,23 +980,24 @@ The `server` module has options to automatically capture more diagnostic informa
 - `java_salt_debugging`: enable additional logs for Hibernate in Tomcat
 - `postgres_log_min_duration`: log PostgreSQL statements taking longer than the duration (expressed as a string, eg. `250ms` or `3s`), or log all statements by specifying `0`
 
-## Using external database
+## Using an external database
 
-Currently, sumaform only support RDS database. The server need to be created in public cloud ( by default AWS). It's possible to get RDS in private network shared by server in aws.
-RDS module return automatically the parameters needed to configure rhn.conf throught setup_env.sh . 
+Currently, sumaform only supports the RDS database as an external database. The server needs to be created in the public cloud (by default AWS). It's possible to get RDS in a private network shared with the server in AWS.
 
+The RDS module returns automatically the parameters needed to configure `rhn.conf` through `setup_env.sh`.
 
-| Output variable    | Type    | Description                                                                                 |
-|--------------------|---------|---------------------------------------------------------------------------------------------|
-| hostname           | string  | RDS hostname that will be use for MANAGER_DB_HOST and REPORT_DB_HOST                        |
-| superuser          | string  | superuser to connect database, it will be use to create MANAGER_USER user and both database |
-| superuser_password | string  | superuser password                                                                          |
-| port               | string  | RDS port ( by default 5432)                                                                 |
-| certificate        | string  | Certificate use to connect RDS database. Certificate is provided by AWS                     |
-| local              | boolean | Set to `false` to use external database                                                     |
+| Output variable      | Type    | Description                                                               |
+|----------------------|---------|---------------------------------------------------------------------------|
+| `hostname`           | string  | RDS hostname that will be used for `MANAGER_DB_HOST` and `REPORT_DB_HOST` |
+| `superuser`          | string  | Superuser to connect database                                             |
+|                      |         | it will be used to create `MANAGER_USER` user and both databases          |
+| `superuser_password` | string  | Superuser password                                                        |
+| `port`               | string  | RDS port (by default `5432`)                                              |
+| `certificate`        | string  | Certificate used to connect RDS database, provided by AWS                 |
+| `local`              | boolean | Set to `false` to use an external database                                |
 
+Example:
 
-Example :
 ```hcl
 module "rds" {
    source             = "./modules/rds"
@@ -921,6 +1011,6 @@ module "server" {
   source = "./modules/server"
   base_configuration = module.base.configuration
   db_configuration = module.db.configuration
-
+  ...
 }
 ```
