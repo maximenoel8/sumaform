@@ -37,6 +37,12 @@ change_searchlist:
     - pattern: NETCONFIG_DNS_STATIC_SEARCHLIST=.*
     - repl: NETCONFIG_DNS_STATIC_SEARCHLIST="{{ grains['domain'] }}"
 
+change_lib_folder:
+  file.replace:
+    - name: /etc/netconfig.d/cloud-netconfig
+    - match: libexec
+    - content: lib
+
 netconfig_update:
   cmd.run:
     - name: netconfig update
