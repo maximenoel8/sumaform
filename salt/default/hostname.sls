@@ -40,8 +40,9 @@ change_searchlist:
 change_lib_folder:
   file.replace:
     - name: /etc/netconfig.d/cloud-netconfig
-    - match: libexec
-    - content: lib
+    - pattern: libexec
+    - repl: lib
+
 
 netconfig_update:
   cmd.run:
