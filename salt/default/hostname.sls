@@ -1,3 +1,6 @@
+include:
+  - default.update
+
 # set the hostname in the kernel, this is needed for Red Hat systems
 # and does not hurt in others
 kernel_hostname:
