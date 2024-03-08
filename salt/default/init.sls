@@ -12,15 +12,8 @@ include:
   # https://build.opensuse.org/project/show/systemsmanagement:sumaform:images:microos
   - default.testsuite
   {% endif %}
+  - default.update
 
-{% if grains.get('use_os_released_updates') | default(false, true) %}
-{% if not grains['osfullname'] == 'SLE Micro' %}
-update_packages:
-  pkg.uptodate:
-    - require:
-      - sls: repos
-{% endif %}
-{% endif %}
 
 {% if grains.get('swap_file_size', "0")|int() > 0 %}
 file_swap:
