@@ -55,7 +55,6 @@ netconfig_update:
     - name: netconfig update
     - require:
       - file: change_searchlist
-      - sls: default.update_packages
 {% else %}
 change_searchlist:
   file.append:
