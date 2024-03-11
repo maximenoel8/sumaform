@@ -6,6 +6,7 @@ resource "aws_iam_instance_profile" "metering_full_access_instance_profile" {
 }
 
 resource "aws_iam_role" "metering_full_access_role" {
+  count  = var.is_server_paygo_instance ? 1 : 0
   name   = "${var.name_prefix}-metering-full-access-role"
 
   assume_role_policy = jsonencode({
@@ -24,6 +25,7 @@ resource "aws_iam_role" "metering_full_access_role" {
 
 
 resource "aws_iam_role_policy_attachment" "metering_full_access_policy_attachment" {
+  count  = var.is_server_paygo_instance ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AWSMarketplaceMeteringFullAccess"
   role       = aws_iam_role.metering_full_access_role.name
 }
