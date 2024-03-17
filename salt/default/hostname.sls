@@ -1,6 +1,3 @@
-include:
-  - default.update
-
 # set the hostname in the kernel, this is needed for Red Hat systems
 # and does not hurt in others
 kernel_hostname:
@@ -39,16 +36,6 @@ change_searchlist:
     - name: /etc/sysconfig/network/config
     - pattern: NETCONFIG_DNS_STATIC_SEARCHLIST=.*
     - repl: NETCONFIG_DNS_STATIC_SEARCHLIST="{{ grains['domain'] }}"
-
-
-# temporary work around still bsc 1220718 fix
-{% if grains.get('provider') != 'libvirt' %}
-change_lib_folder:
-  file.replace:
-    - name: /etc/netconfig.d/cloud-netconfig
-    - pattern: libexec
-    - repl: lib
-{% endif %} {# grains.get('provider') != 'libvirt' #}
 
 netconfig_update:
   cmd.run:
