@@ -1,5 +1,6 @@
 include:
   - default.locale
+  - default.update
   - default.minimal
   - default.pkgs
   - default.grub
@@ -12,7 +13,6 @@ include:
   # https://build.opensuse.org/project/show/systemsmanagement:sumaform:images:microos
   - default.testsuite
   {% endif %}
-  - default.update
 
 
 {% if grains.get('swap_file_size', "0")|int() > 0 %}
