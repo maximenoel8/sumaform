@@ -121,7 +121,7 @@ variable "image" {
 
 variable "main_disk_size" {
   description = "Size of main disk, defined in GiB"
-  default     = 20
+  default     = 200
 }
 
 variable "repository_disk_size" {
