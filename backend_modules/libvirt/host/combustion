@@ -1,6 +1,8 @@
 #!/bin/bash
+ls /etc/ssh/ > test.log
+systemctl status sshd.service >> test.log
 # combustion: network prepare
-set -euxo pipefail
+#set -euxo pipefail >> test.log
 
 function nm_config() {
   connectiondir="/etc/NetworkManager/system-connections"
