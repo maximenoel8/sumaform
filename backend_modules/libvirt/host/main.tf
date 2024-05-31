@@ -77,7 +77,7 @@ data "template_file" "combustion" {
   template = file("${path.module}/combustion")
   vars = {
     gpg_keys = join("\n", [for key in local.gpg_keys :
-    "mkdir -p `dirname ${key.path}` && echo ${key.content} | base64 -d >${key.path} && rpm --import ${key.path}"
+    "mkdir -p `dirname ${key.path}` && echo ${key.content} | base64 -d >${key.path} && gpg --import ${key.path}"
   ])
     use_mirror_images   = var.base_configuration["use_mirror_images"]
     mirror              = var.base_configuration["mirror"]
