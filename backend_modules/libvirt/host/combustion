@@ -54,7 +54,7 @@ systemctl enable sshd.service
 ${ gpg_keys }
 
 # Add repositories
-zypper ar http://${ use_mirror_images ? mirror : "download.opensuse.org" }/repositories/SUSE:/CA/15.5/ ca_suse
+zypper ar --no-gpgcheck http://${ use_mirror_images ? mirror : "download.opensuse.org" }/repositories/SUSE:/CA/15.5/ ca_suse
 
 %{ if image == "leapmicro55o" }
 zypper ar http://${ use_mirror_images ? mirror : "download.opensuse.org" }/repositories/systemsmanagement:/Uyuni:/Master:/openSUSE_Leap_15-Uyuni-Client-Tools/openSUSE_Leap_15.0/ client_tools_repo
@@ -77,11 +77,11 @@ zypper ar http://${ use_mirror_images ? mirror : "download.opensuse.org" }/updat
 %{ endif } # end of image == "leapmicro55o" block
 
 %{ if image == "slmicro60o" }
-zypper ar http://${ use_mirror_images ? mirror : "download.suse.de/ibs"}/SUSE/Products/SL-Micro/6.0/x86_64/product/ os_pool_repo
-zypper ar http://${ use_mirror_images ? mirror : "download.suse.de/ibs"}/SUSE/Products/SLE-Module-Basesystem/15-SP6/x86_64/product/ basesystem_pool_repo
+zypper ar --no-gpgcheck http://${ use_mirror_images ? mirror : "download.suse.de/ibs"}/SUSE/Products/SL-Micro/6.0/x86_64/product/ os_pool_repo
+zypper ar --no-gpgcheck http://${ use_mirror_images ? mirror : "download.suse.de/ibs"}/SUSE/Products/SLE-Module-Basesystem/15-SP6/x86_64/product/ basesystem_pool_repo
 
 %{ if product_version == "uyuni-master" || product_version == "uyuni-released"  || product_version == "uyuni-pr"}
-zypper ar http://${ use_mirror_images ? mirror : "download.opensuse.org"}/repositories/systemsmanagement:/Uyuni:/Master:/SLMicro6-Uyuni-Client-Tools/SL-Micro6/ client_tools_repo
+zypper ar --no-gpgcheck http://${ use_mirror_images ? mirror : "download.opensuse.org"}/repositories/systemsmanagement:/Uyuni:/Master:/SLMicro6-Uyuni-Client-Tools/SL-Micro6/ client_tools_repo
 %{ endif }
 %{ if product_version == "head" }
 zypper ar http://${ use_mirror_images ? mirror : "download.suse.de"}/ibs/Devel:/Galaxy:/Manager:/Head:/SL-Micro-6-SUSE-Manager-Tools/SL-Micro6/ client_tools_repo
