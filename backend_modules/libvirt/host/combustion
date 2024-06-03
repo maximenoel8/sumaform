@@ -84,14 +84,14 @@ zypper ar --no-gpgcheck http://${ use_mirror_images ? mirror : "download.suse.de
 zypper ar --no-gpgcheck http://${ use_mirror_images ? mirror : "download.opensuse.org"}/repositories/systemsmanagement:/Uyuni:/Master:/SLMicro6-Uyuni-Client-Tools/SL-Micro6/ client_tools_repo
 %{ endif }
 %{ if product_version == "head" }
-zypper ar --no-gpgcheck http://${ use_mirror_images ? mirror : "download.suse.de"}/ibs/Devel:/Galaxy:/Manager:/Head:/SL-Micro-6-SUSE-Manager-Tools/SL-Micro6/ client_tools_repo
+zypper ar http://${ use_mirror_images ? mirror : "download.suse.de"}/ibs/Devel:/Galaxy:/Manager:/Head:/SL-Micro-6-SUSE-Manager-Tools/SL-Micro6/ client_tools_repo
 %{ endif }
 %{ if product_version == "4.3-released" || product_version == "4.3-nightly" || product_version == "4.3-pr" || product_version == "4.3-beta" || product_version == "4.3-build_image" || product_version == "4.3-paygo" || product_version == "4.3-VM-nightly" || product_version == "4.3-VM-released"}
 zypper ar http://${ use_mirror_images ? mirror : "download.suse.de"}/ibs/Devel:/Galaxy:/Manager:/4.3:/SL-Micro-6-SUSE-Manager-Tools/SL-Micro6/ client_tools_repo
 %{ endif }
 
 %{ if testsuite }
-zypper ar --no-gpgcheck http://${ use_mirror_images ? mirror : "download.opensuse.org" }/repositories/systemsmanagement:/Uyuni:/Test-Packages:/Pool/rpm/ test_packages_pool
+zypper ar http://${ use_mirror_images ? mirror : "download.opensuse.org" }/repositories/systemsmanagement:/Uyuni:/Test-Packages:/Pool/rpm/ test_packages_pool
 %{ endif }
 %{ endif } # end of image == "slmicro60o" block
 
