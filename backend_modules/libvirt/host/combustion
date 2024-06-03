@@ -44,7 +44,7 @@ echo 'root:$6$3aQC9rrDLHiTf1yR$NoKe9tko0kFIpu0rQ2y/OzOOtbVvs0Amr2bx0T4cGf6aq8PG7
 
 # SL Micro6: Add PermitRootLogin to sshd config
 %{ if image == "slmicro60o" }
-echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+echo "PermitRootLogin yes" > /etc/ssh/sshd_config.d/root.conf
 %{ endif }
 
 # Add a public ssh key and enable sshd
