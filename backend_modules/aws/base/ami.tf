@@ -124,7 +124,7 @@ data "aws_ami" "sles15sp5-paygo" {
   }
 }
 
-data "aws_ami" "slemcro55o" {
+data "aws_ami" "slemicro55o" {
   most_recent = true
   name_regex  = "^suse-sle-micro-5-5-byos-v"
   owners      = ["013907871322"]
