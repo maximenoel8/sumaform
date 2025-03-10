@@ -10,6 +10,7 @@ module "minion" {
   additional_repos_only         = var.additional_repos_only
   additional_packages           = var.additional_packages
   gpg_keys                      = var.gpg_keys
+  provision                     = var.provision
   swap_file_size                = var.swap_file_size
   ssh_key_path                  = var.ssh_key_path
   ipv6                          = var.ipv6

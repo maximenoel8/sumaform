@@ -126,3 +126,9 @@ variable "sles_registration_code" {
   description = "SUMA SCC registration code to enable the SLES server"
   default     = null
 }
+
+variable "provision" {
+  description = "Indicates whether minion should be provisioned or not"
+  type        = bool
+  default     = true
+}
