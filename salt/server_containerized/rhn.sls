@@ -19,7 +19,7 @@ limit_changelog_entries:
     - repl: java.max_changelog_entries = 3
     - append_if_not_found: true
     - require:
-      - sls: server
+      - sls: server_containerized
 
 {% if grains.get('disable_download_tokens') %}
 disable_download_tokens:
@@ -101,7 +101,7 @@ rhn_conf_disable_auto_generate_bootstrap_repo :
     - name: /etc/rhn/rhn.conf
     - text: server.susemanager.auto_generate_bootstrap_repo = 0
     - require:
-      - sls: server
+      - sls: server_containerized
 
 {% endif %}
 
