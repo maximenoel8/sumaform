@@ -4,7 +4,7 @@ register_sles_server:
    cmd.run:
      - name: SUSEConnect --url https://scc.suse.com -r {{ grains.get("sles_registration_code") }} -p SLES/{{ grains['osrelease'] }}/x86_64
 
-{% if '15' in grains['osrelease'] %}
+{% if '15' in grains['osrelease'] or '12' in grains['osrelease'] %}
 
 basesystem_activation:
    cmd.run:
