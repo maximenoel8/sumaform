@@ -42,7 +42,7 @@ locals {
     contains(var.roles, "grafana") ? { memory = 4096 } : {},
     contains(var.roles, "salt_testenv") ? { memory = 4096, vcpu = 2 } : {},
     contains(var.roles, "virthost") ? { memory = 4096, vcpu = 3 } : {},
-    contains(var.roles, "jenkins") ? { memory = 16384, vcpu = 4 } : {},
+    contains(var.roles, "jenkins") ? { memory = 20480, vcpu = 4 } : {},
     var.provider_settings,
     contains(var.roles, "virthost") ? { cpu_model = "host-passthrough", xslt = file("${path.module}/virthost.xsl") } : {},
     contains(var.roles, "pxe_boot") ? { xslt = templatefile("${path.module}/pxe_boot.xsl", { manufacturer = local.manufacturer, product = local.product }) } : {})
