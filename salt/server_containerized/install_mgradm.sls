@@ -12,7 +12,7 @@ mgradm_config:
 
 mgradm_install:
   cmd.run:
-    - name: mgradm install {{ install_cmd }} --logLevel=debug --config /root/mgradm.yaml {{ grains.get("fqdn") }}
+    - name: mgradm install {{ install_cmd }} --logLevel=debug --config /root/mgradm.yaml {{ grains.get("fqdn") }} --saline-replicas 1
     - env:
       - KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 {%- if grains.get('container_runtime') | default('podman', true) == 'podman' %}
