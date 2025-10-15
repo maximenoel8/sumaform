@@ -99,6 +99,16 @@ ca_suse:
     - pkgs:
       - ca-certificates-suse
 {% endif %}
+{% if grains.get('testsuite') | default(false, true) %}
+testsuite_packages:
+  pkg.installed:
+    - pkgs:
+      - expect
+{% if 'build_image' not in grains.get('product_version') | default('', true) %}
+    - require:
+      - sls: repos
+{% endif %}
+{% endif %}
 {% endif %}
 
 # This will only work if the proxy is part of the cucumber_testsuite module, otherwise the server might not be ready
@@ -121,3 +131,4 @@ install_proxy_container:
     - name: |
        mgrpxy install podman /root/config.tar.gz
 {% endif %}
+
