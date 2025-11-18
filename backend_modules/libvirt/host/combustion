@@ -30,7 +30,7 @@ if [ "$${1-}" = "--prepare" ]; then
 fi
 
 # Redirect output to the console
-exec > >(exec tee -a /root/combustion.log) 2>&1
+exec > >(exec tee -a /var/log/combustion) 2>&1
 
 # Name the Network Manager connections (final phase on real filesystem)
 nm_config 1 eth0 auto
@@ -197,9 +197,9 @@ TEST_PACKAGES=""
 TEST_PACKAGES="$TEST_PACKAGES expect bind-utils"
 %{ endif }
 TEST_PACKAGES="$TEST_PACKAGES andromeda-dummy milkyway-dummy virgo-dummy timezone wget"
-zypper --non-interactive install $TEST_PACKAGES
+#zypper --non-interactive install $TEST_PACKAGES
 # cleanup - ignore errors for missing repos and suppress output
-#zypper rr leap_pool_repo leap_update_repo >/dev/null 2>&1 || true
+zypper rr leap_pool_repo leap_update_repo >/dev/null 2>&1 || true
 %{ endif }
 
 # Disabling this timer safely by masking it (systemctl might still be unavailable during the Combustion phase)
