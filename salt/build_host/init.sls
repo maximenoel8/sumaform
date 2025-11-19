@@ -7,6 +7,12 @@ certificate_authority_certificate:
     - source: salt://build_host/certs/ca.cert.pem
     - makedirs: True
 
+certificate_authority_certificate_registry:
+  file.managed:
+    - name: /etc/pki/trust/anchors/registry.cert.pem
+    - source: salt://build_host/certs/registry.cert.pem
+    - makedirs: True
+
 ssh_private_key:
   file.managed:
     - name: /root/.ssh/id_ed25519
