@@ -35,5 +35,15 @@ module "build_host" {
 }
 
 output "configuration" {
-  value = module.build_host.configuration
+  value = {
+    id              = length(module.build_host.configuration["ids"]) > 0 ? module.build_host.configuration["ids"][0] : null
+    hostname        = length(module.build_host.configuration["hostnames"]) > 0 ? module.build_host.configuration["hostnames"][0] : null
+
+    ids             = module.build_host.configuration["ids"]
+    hostnames       = module.build_host.configuration["hostnames"]
+    macaddrs        = module.build_host.configuration["macaddrs"]
+    ipaddrs         = module.build_host.configuration["ipaddrs"]
+    private_macs    = module.build_host.configuration["private_macs"]
+    product_version = local.product_version
+  }
 }

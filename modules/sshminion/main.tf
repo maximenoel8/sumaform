@@ -33,6 +33,15 @@ module "sshminion" {
 }
 
 output "configuration" {
-  value = module.sshminion.configuration
-}
+  value = {
+    id              = length(module.sshminion.configuration["ids"]) > 0 ? module.sshminion.configuration["ids"][0] : null
+    hostname        = length(module.sshminion.configuration["hostnames"]) > 0 ? module.sshminion.configuration["hostnames"][0] : null
 
+    ids             = module.sshminion.configuration["ids"]
+    hostnames       = module.sshminion.configuration["hostnames"]
+    macaddrs        = module.sshminion.configuration["macaddrs"]
+    ipaddrs         = module.sshminion.configuration["ipaddrs"]
+    private_macs    = module.sshminion.configuration["private_macs"]
+    product_version = local.product_version
+  }
+}
