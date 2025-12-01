@@ -127,9 +127,6 @@ variable "sle12sp5_paygo_minion_configuration" {
 
 variable "sle15sp4_byos_minion_configuration" {
   description = "use module.<SLE15SP4_BYOS_MINION>.configuration, see main.tf.libvirt-testsuite.example"
-  default = {
-    hostname = null
-  }
 }
 
 variable "sle15sp5_paygo_minion_configuration" {
