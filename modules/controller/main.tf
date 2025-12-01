@@ -80,10 +80,12 @@ module "controller" {
     sle15sp5_paygo_minion    = length(var.sle15sp5_paygo_minion_configuration["hostnames"]) > 0 ? var.sle15sp5_paygo_minion_configuration["hostnames"][0] : null
     sle15sp6_paygo_minion    = length(var.sle15sp6_paygo_minion_configuration["hostnames"]) > 0 ? var.sle15sp6_paygo_minion_configuration["hostnames"][0] : null
     sleforsap15sp5_paygo_minion = length(var.sleforsap15sp5_paygo_minion_configuration["hostnames"]) > 0 ? var.sleforsap15sp5_paygo_minion_configuration["hostnames"][0] : null
-    sle12sp5_minion          = length(var.sle12sp5_minion_configuration["hostnames"]) > 0 ? var.sle12sp5_minion_configuration["hostnames"][0] : "toto"
+    # sle12sp5_minion          = length(var.sle12sp5_minion_configuration["hostnames"]) > 0 ? var.sle12sp5_minion_configuration["hostnames"][0] : "toto"
+    sle12sp5_minion          = var.sle12sp5_minion_configuration["hostnames"][0]
     sle12sp5_sshminion       = length(var.sle12sp5_sshminion_configuration["hostnames"]) > 0 ? var.sle12sp5_sshminion_configuration["hostnames"][0] : null
     sle12sp5_client          = length(var.sle12sp5_client_configuration["hostnames"]) > 0 ? var.sle12sp5_client_configuration["hostnames"][0] : null
-    sle15sp3_minion          = length(var.sle15sp3_minion_configuration["hostnames"]) > 0 ? var.sle15sp3_minion_configuration["hostnames"][0] : null
+    # sle15sp3_minion          = length(var.sle15sp3_minion_configuration["hostnames"]) > 0 ? var.sle15sp3_minion_configuration["hostnames"][0] : null
+    sle15sp3_minion          = var.sle15sp3_minion_configuration["hostnames"][0]
     sle15sp3_sshminion       = length(var.sle15sp3_sshminion_configuration["hostnames"]) > 0 ? var.sle15sp3_sshminion_configuration["hostnames"][0] : null
     sle15sp3_client          = length(var.sle15sp3_client_configuration["hostnames"]) > 0 ? var.sle15sp3_client_configuration["hostnames"][0] : null
     sle15sp4_client          = length(var.sle15sp4_client_configuration["hostnames"]) > 0 ? var.sle15sp4_client_configuration["hostnames"][0] : null
