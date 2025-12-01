@@ -40,7 +40,5 @@ module "minion" {
 }
 
 output "configuration" {
-  value = {
-    hostname           = length(module.minion.configuration["hostnames"]) > 0 ? module.minion.configuration["hostnames"][0] : null
-  }
+  value = module.minion.configuration
 }
