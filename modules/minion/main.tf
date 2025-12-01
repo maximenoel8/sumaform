@@ -40,5 +40,15 @@ module "minion" {
 }
 
 output "configuration" {
-  value = module.minion.configuration
+  id              = length(module.minion.configuration["ids"]) > 0 ? module.minion.configuration["ids"][0] : null
+  hostname        = length(module.minion.configuration["hostnames"]) > 0 ? module.minion.configuration["hostnames"][0] : null
+
+  # Pass through original lists in case they are needed for advanced iteration
+  ids             = module.minion.configuration["ids"]
+  hostnames       = module.minion.configuration["hostnames"]
+  macaddrs        = module.minion.configuration["macaddrs"]
+  ipaddrs         = module.minion.configuration["ipaddrs"]
+  private_macs    = module.minion.configuration["private_macs"]
+
+  product_version = local.product_version
 }
