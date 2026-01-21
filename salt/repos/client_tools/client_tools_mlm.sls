@@ -195,14 +195,14 @@ tools_additional_repo:
   - baseurl: http://{{ grains.get("mirror") | default("dist.suse.de", true) }}/ibs/Devel:/Galaxy:/Manager:/5.1:/MLMTools-SL-Micro-6/product/repo/Multi-Linux-ManagerTools-SL-Micro-6-{{ grains.get("cpuarch") }}/
   - refresh: True
   - priority: 98
-
+{# 
 {% elif 'head' in grains.get('product_version') | default('', true) %}
 
 tools_additional_repo:
   pkgrepo.managed:
     - baseurl: http://{{ grains.get("mirror") | default("dist.suse.de", true) }}/ibs/Devel:/Galaxy:/Manager:/Head:/MLMTools-Beta-SLE15/images/repo/ManagerTools-Beta-SLE15-Pool-{{ grains.get("cpuarch") }}-Media1/
     - refresh: True
-    - priority: 98
+    - priority: 98 #}
 
 {% endif %} {# Devel Tools Repos #}
 {% endif %} {# grains['osfullname'] == 'SL-Micro' #}
