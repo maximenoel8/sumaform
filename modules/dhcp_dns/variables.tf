@@ -36,3 +36,8 @@ variable "hypervisor" {
                 })
   default     = null
 }
+
+variable "ssh_key_path" {
+  description = "path of additional pub ssh key you want to use to access VMs, see README_ADVANCED.md"
+  default     = null
+}

@@ -4,7 +4,7 @@ module "dhcp_dns" {
   base_configuration            = var.base_configuration
   name                          = var.name
   quantity                      = var.base_configuration["additional_network"] != null ? var.quantity : 0
-
+  ssh_key_path                  = var.ssh_key_path
   connect_to_base_network       = false
   connect_to_additional_network = true
   roles                         = ["dhcp_dns"]
