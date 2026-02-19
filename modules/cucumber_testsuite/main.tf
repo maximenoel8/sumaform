@@ -268,7 +268,7 @@ module "dhcp_dns" {
   name               = lookup(local.names, "dhcp_dns", "dhcp-dns")
 
   private_hosts      = [ local.proxy_configuration, module.pxeboot_minion.configuration ]
-
+  ssh_key_path       = "./salt/controller/id_ed25519.pub"
   hypervisor         = lookup(local.hypervisors, "dhcp_dns", null)
 }
 
