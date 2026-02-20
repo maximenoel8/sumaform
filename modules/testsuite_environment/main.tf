@@ -719,6 +719,76 @@ module "slmicro61_minion" {
   ssh_key_path            = "./salt/controller/id_ed25519.pub"
 }
 
+module "tumbleweed_minion" {
+  providers          = { libvirt = libvirt.host_new_sle }
+  source             = "../minion"
+  count              = lookup(var.environment_configuration, "tumbleweed_minion", null) != null ? 1 : 0
+  base_configuration = local.base_new_sle
+  name               = var.environment_configuration.tumbleweed_minion.name
+  image              = "tumbleweedo"
+  provider_settings = {
+    mac    = var.environment_configuration.tumbleweed_minion.mac
+    memory = 4096
+  }
+
+  auto_connect_to_master  = false
+  use_os_released_updates = false
+  ssh_key_path            = "./salt/controller/id_ed25519.pub"
+}
+
+module "tumbleweed_sshminion" {
+  providers = { libvirt = libvirt.host_old_sle }
+  source             = "../sshminion"
+  count              = lookup(var.environment_configuration, "tumbleweed_sshminion", null) != null ? 1 : 0
+  base_configuration = local.base_old_sle
+  name               = var.environment_configuration.tumbleweed_sshminion.name
+  image              = "tumbleweedo"
+  provider_settings = {
+    mac    = var.environment_configuration.tumbleweed_sshminion.mac
+    memory = 4096
+  }
+
+  use_os_released_updates = false
+  ssh_key_path            = "./salt/controller/id_ed25519.pub"
+  gpg_keys                = ["default/gpg_keys/galaxy.key"]
+}
+
+# KVM Host (virthost) sets VIRTHOST_KVM_URL in bashrc.
+
+module "sles15sp7_kvmhost" {
+  providers          = { libvirt = libvirt.host_new_sle }
+  source             = "../virthost"
+  count              = lookup(var.environment_configuration, "sles15sp7_kvmhost", null) != null ? 1 : 0
+  base_configuration = local.base_new_sle
+  name               = var.environment_configuration.sles15sp7_kvmhost.name
+  image              = "sles15sp7o"
+  provider_settings = {
+    mac    = var.environment_configuration.sles15sp7_kvmhost.mac
+    memory = 4096
+    vcpu   = 4
+  }
+
+  auto_connect_to_master  = false
+  use_os_released_updates = false
+  ssh_key_path            = "./salt/controller/id_ed25519.pub"
+}
+
+module "sle15sp7_pxebootminion" {
+  providers          = { libvirt = libvirt.host_new_sle }
+  source             = "../pxe_boot"
+  count              = lookup(var.environment_configuration, "pxeboot_minion", null) != null ? 1 : 0
+  base_configuration = local.base_new_sle
+  image              = "sles15sp7o"
+  name               = var.environment_configuration.sle15sp7_pxebootminion.name
+
+  ## To define
+  # private_ip         = lookup(local.private_ip, "pxeboot_minion", 4)
+  # private_name       = lookup(local.private_name, "pxeboot_minion", "pxeboot")
+  #
+  # provider_settings  = lookup(local.provider_settings_by_host, "pxeboot_minion", {})
+}
+
+
 module "sles12sp5_sshminion" {
   providers = { libvirt = libvirt.host_old_sle }
   source             = "../sshminion"
@@ -1393,6 +1463,11 @@ module "controller" {
   debian_minion  = local._alias_deblike_minion_hostname
   build_host     = local._alias_build_host_hostname
   kvm_host       = local._alias_kvm_host_hostname
+
+
+  tumbleweed_minion_configuration    = length(module.tumbleweed_minion) > 0 ? module.tumbleweed_minion[0].configuration : local.empty_minion_config
+  tumbleweed_sshminion_configuration = length(module.tumbleweed_sshminion) > 0 ? module.tumbleweed_sshminion[0].configuration : local.empty_minion_config
+  sles15sp7_kvmhost_configuration    = length(module.sles15sp7_kvmhost) > 0 ? module.sles15sp7_kvmhost[0].configuration : local.empty_minion_config
 
   # Versioned grains dual-set from alias hosts
   # Each is set to the alias hostname when the alias points to that specific
