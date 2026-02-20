@@ -11,6 +11,80 @@ locals {
   empty_minion_config = { ids = [], hostnames = [], macaddrs = [], private_macs = [], ipaddrs = [] }
   empty_terminal_config = { private_mac = null, private_ip = null, private_name = null, image = null }
   empty_proxy_config = { hostname = null }
+
+  # ── Helper: resolve a hostname from a versioned module, given its key ─────
+  # Returns null when no alias is declared or the target module has count=0.
+
+  _alias_suse_minion_hostname = (
+  var.cucumber_aliases.suse_minion != null &&
+  length(module[var.cucumber_aliases.suse_minion]) > 0
+  ) ? module[var.cucumber_aliases.suse_minion][0].configuration.hostnames[0] : null
+
+  _alias_suse_sshminion_hostname = (
+  var.cucumber_aliases.suse_sshminion != null &&
+  length(module[var.cucumber_aliases.suse_sshminion]) > 0
+  ) ? module[var.cucumber_aliases.suse_sshminion][0].configuration.hostnames[0] : null
+
+  _alias_suse_client_hostname = (
+  var.cucumber_aliases.suse_client != null &&
+  length(module[var.cucumber_aliases.suse_client]) > 0
+  ) ? module[var.cucumber_aliases.suse_client][0].configuration.hostnames[0] : null
+
+  _alias_rhlike_minion_hostname = (
+  var.cucumber_aliases.rhlike_minion != null &&
+  length(module[var.cucumber_aliases.rhlike_minion]) > 0
+  ) ? module[var.cucumber_aliases.rhlike_minion][0].configuration.hostnames[0] : null
+
+  _alias_deblike_minion_hostname = (
+  var.cucumber_aliases.deblike_minion != null &&
+  length(module[var.cucumber_aliases.deblike_minion]) > 0
+  ) ? module[var.cucumber_aliases.deblike_minion][0].configuration.hostnames[0] : null
+
+  _alias_build_host_hostname = (
+  var.cucumber_aliases.build_host != null &&
+  length(module[var.cucumber_aliases.build_host]) > 0
+  ) ? module[var.cucumber_aliases.build_host][0].configuration.hostnames[0] : null
+
+  _alias_kvm_host_hostname = (
+  var.cucumber_aliases.kvm_host != null &&
+  length(module[var.cucumber_aliases.kvm_host]) > 0
+  ) ? module[var.cucumber_aliases.kvm_host][0].configuration.hostnames[0] : null
+
+  # ── Alias-to-grain name mapping ───────────────────────────────────────────
+  # Maps the cucumber_aliases key (e.g. "sles15sp7_minion") to the grain name
+  # used in bashrc (e.g. "sle15sp7_minion"). This is what sets the versioned
+  # env var (SLE15SP7_MINION) alongside the generic one (MINION).
+  _alias_grain_map = {
+    # minions
+    "sles15sp4_minion"  = "sle15sp4_minion"
+    "sles15sp5_minion"  = "sle15sp5_minion"
+    "sles15sp6_minion"  = "sle15sp6_minion"
+    "sles15sp7_minion"  = "sle15sp7_minion"
+    "tumbleweed_minion" = null  # no versioned BV grain for tumbleweed minion
+    "rocky8_minion"     = "rocky8_minion"
+    "rocky9_minion"     = "rocky9_minion"
+    # sshminions
+    "sles15sp4_sshminion"  = "sle15sp4_sshminion"
+    "sles15sp5_sshminion"  = "sle15sp5_sshminion"
+    "sles15sp6_sshminion"  = "sle15sp6_sshminion"
+    "sles15sp7_sshminion"  = "sle15sp7_sshminion"
+    "tumbleweed_sshminion" = null
+    "rocky8_sshminion"     = "rocky8_sshminion"
+    "rocky9_sshminion"     = "rocky9_sshminion"
+    # clients
+    "sles15sp4_client" = "sle15sp4_client"
+    "sles15sp6_client" = "sle15sp6_client"
+    "sles15sp7_client" = "sle15sp7_client"
+    # deblike
+    "ubuntu2204_minion" = "ubuntu2204_minion"
+    "ubuntu2404_minion" = "ubuntu2404_minion"
+    # buildhosts
+    "sles15sp6_buildhost" = "sle15sp6_buildhost"
+    "sles15sp7_buildhost" = "sle15sp7_buildhost"
+    # kvm hosts
+    "sles15sp6_kvmhost" = null  # kvm_host grain is already generic
+    "sles15sp7_kvmhost" = null
+  }
 }
 
 provider "libvirt" {
@@ -1310,6 +1384,41 @@ module "controller" {
 
   server_configuration = local.server_configuration
   proxy_configuration  = local.proxy_configuration
+
+  # Generic cucumber grains — only set when an alias is declared
+  minion       = local._alias_suse_minion_hostname != null ? local._alias_suse_minion_hostname : (length(module.sles15sp7_minion) > 0 ? null : null)  # alias takes precedence; see note below
+  ssh_minion   = local._alias_suse_sshminion_hostname
+  client       = local._alias_suse_client_hostname != null ? local._alias_suse_client_hostname : (length(module.sles15sp7_client) > 0 ? null : null)
+  redhat_minion  = local._alias_rhlike_minion_hostname
+  debian_minion  = local._alias_deblike_minion_hostname
+  build_host     = local._alias_build_host_hostname
+  kvm_host       = local._alias_kvm_host_hostname
+
+  # Versioned grains dual-set from alias hosts
+  # Each is set to the alias hostname when the alias points to that specific
+  # module, otherwise falls back to the module's own configuration as before.
+  sle15sp4_minion    = local._alias_suse_minion_hostname != null && var.cucumber_aliases.suse_minion == "sles15sp4_minion" ? local._alias_suse_minion_hostname : (length(module.sles15sp4_minion) > 0 ? module.sles15sp4_minion[0].configuration.hostnames[0] : null)
+  sle15sp5_minion    = local._alias_suse_minion_hostname != null && var.cucumber_aliases.suse_minion == "sles15sp5_minion" ? local._alias_suse_minion_hostname : (length(module.sles15sp5_minion) > 0 ? module.sles15sp5_minion[0].configuration.hostnames[0] : null)
+  sle15sp6_minion    = local._alias_suse_minion_hostname != null && var.cucumber_aliases.suse_minion == "sles15sp6_minion" ? local._alias_suse_minion_hostname : (length(module.sles15sp6_minion) > 0 ? module.sles15sp6_minion[0].configuration.hostnames[0] : null)
+  sle15sp7_minion    = local._alias_suse_minion_hostname != null && var.cucumber_aliases.suse_minion == "sles15sp7_minion" ? local._alias_suse_minion_hostname : (length(module.sles15sp7_minion) > 0 ? module.sles15sp7_minion[0].configuration.hostnames[0] : null)
+
+  sle15sp4_sshminion = local._alias_suse_sshminion_hostname != null && var.cucumber_aliases.suse_sshminion == "sles15sp4_sshminion" ? local._alias_suse_sshminion_hostname : (length(module.sles15sp4_sshminion) > 0 ? module.sles15sp4_sshminion[0].configuration.hostnames[0] : null)
+  sle15sp5_sshminion = local._alias_suse_sshminion_hostname != null && var.cucumber_aliases.suse_sshminion == "sles15sp5_sshminion" ? local._alias_suse_sshminion_hostname : (length(module.sles15sp5_sshminion) > 0 ? module.sles15sp5_sshminion[0].configuration.hostnames[0] : null)
+  sle15sp6_sshminion = local._alias_suse_sshminion_hostname != null && var.cucumber_aliases.suse_sshminion == "sles15sp6_sshminion" ? local._alias_suse_sshminion_hostname : (length(module.sles15sp6_sshminion) > 0 ? module.sles15sp6_sshminion[0].configuration.hostnames[0] : null)
+  sle15sp7_sshminion = local._alias_suse_sshminion_hostname != null && var.cucumber_aliases.suse_sshminion == "sles15sp7_sshminion" ? local._alias_suse_sshminion_hostname : (length(module.sles15sp7_sshminion) > 0 ? module.sles15sp7_sshminion[0].configuration.hostnames[0] : null)
+
+  sle15sp4_client    = local._alias_suse_client_hostname != null && var.cucumber_aliases.suse_client == "sles15sp4_client" ? local._alias_suse_client_hostname : (length(module.sles15sp4_client) > 0 ? module.sles15sp4_client[0].configuration.hostnames[0] : null)
+  sle15sp6_client    = local._alias_suse_client_hostname != null && var.cucumber_aliases.suse_client == "sles15sp6_client" ? local._alias_suse_client_hostname : (length(module.sles15sp6_client) > 0 ? module.sles15sp6_client[0].configuration.hostnames[0] : null)
+  sle15sp7_client    = local._alias_suse_client_hostname != null && var.cucumber_aliases.suse_client == "sles15sp7_client" ? local._alias_suse_client_hostname : (length(module.sles15sp7_client) > 0 ? module.sles15sp7_client[0].configuration.hostnames[0] : null)
+
+  rocky8_minion      = local._alias_rhlike_minion_hostname != null && var.cucumber_aliases.rhlike_minion == "rocky8_minion" ? local._alias_rhlike_minion_hostname : (length(module.rocky8_minion) > 0 ? module.rocky8_minion[0].configuration.hostnames[0] : null)
+  rocky9_minion      = local._alias_rhlike_minion_hostname != null && var.cucumber_aliases.rhlike_minion == "rocky9_minion" ? local._alias_rhlike_minion_hostname : (length(module.rocky9_minion) > 0 ? module.rocky9_minion[0].configuration.hostnames[0] : null)
+
+  ubuntu2204_minion  = local._alias_deblike_minion_hostname != null && var.cucumber_aliases.deblike_minion == "ubuntu2204_minion" ? local._alias_deblike_minion_hostname : (length(module.ubuntu2204_minion) > 0 ? module.ubuntu2204_minion[0].configuration.hostnames[0] : null)
+  ubuntu2404_minion  = local._alias_deblike_minion_hostname != null && var.cucumber_aliases.deblike_minion == "ubuntu2404_minion" ? local._alias_deblike_minion_hostname : (length(module.ubuntu2404_minion) > 0 ? module.ubuntu2404_minion[0].configuration.hostnames[0] : null)
+
+  sle15sp6_buildhost = local._alias_build_host_hostname != null && var.cucumber_aliases.build_host == "sles15sp6_buildhost" ? local._alias_build_host_hostname : (length(module.sles15sp6_buildhost) > 0 ? module.sles15sp6_buildhost[0].configuration.hostnames[0] : null)
+  sle15sp7_buildhost = local._alias_build_host_hostname != null && var.cucumber_aliases.build_host == "sles15sp7_buildhost" ? local._alias_build_host_hostname : (length(module.sles15sp7_buildhost) > 0 ? module.sles15sp7_buildhost[0].configuration.hostnames[0] : null)
 
   sle12sp5_minion_configuration    = length(module.sles12sp5_minion) > 0 ? module.sles12sp5_minion[0].configuration : local.empty_minion_config
   sle12sp5_sshminion_configuration = length(module.sles12sp5_sshminion) > 0 ? module.sles12sp5_sshminion[0].configuration : local.empty_minion_config
