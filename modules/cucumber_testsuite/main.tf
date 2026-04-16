@@ -486,6 +486,7 @@ module "rhlike_minion" {
   additional_packages = lookup(local.additional_packages, "rhlike_minion", [])
   additional_grains = lookup(local.additional_grains, "rhlike_minion", {})
   provider_settings = lookup(local.provider_settings_by_host, "rhlike_minion", {})
+  salt_log_level    = var.salt_log_level
 }
 
 module "deblike_minion" {
