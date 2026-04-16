@@ -190,6 +190,7 @@ module "server_containerized" {
   database_disk_size            = lookup(local.database_disk_size, "server_containerized", 0)
   large_deployment              = lookup(local.large_deployment, "server_containerized", true)
   enable_oval_metadata          = lookup(local.enable_oval_metadata, "server_containerized", false)
+  salt_log_level                = var.salt_log_level
 
 }
 
