@@ -263,10 +263,6 @@ resource "terraform_data" "provisioning" {
 
   count = var.provision ? var.quantity : 0
 
-  provisioner "local-exec" {
-    command = "sleep 20"
-  }
-
   connection {
     host     = libvirt_domain.domain[count.index].network_interface[0].addresses[0]
     user     = "root"

@@ -19,6 +19,6 @@ network:
       - type: static
         address: ${dhcp_dns_address}
 %{ else }
-      - type: dhcp
+      - type: dhcp4
 %{ endif }
 %{ endif }
