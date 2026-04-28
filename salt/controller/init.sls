@@ -46,7 +46,6 @@ cucumber_requisites:
       - git-core
       - aaa_base-extras
       - zlib-devel
-      - libxslt-devel
       - mozilla-nss-tools
       - postgresql-devel
       - unzip
