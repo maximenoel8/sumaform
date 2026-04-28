@@ -1,8 +1,9 @@
 {% set osfullname = grains['osfullname'] %}
 {% set osrelease = grains['osrelease'] %}
 {% set is_sles_15_7 = osfullname == 'SLES' and osrelease == '15.7' %}
+{% set is_ubuntu = osfullname == 'Ubuntu' %}
 {% set is_tumbleweed = osfullname == 'openSUSE Tumbleweed' %}
-{% set is_supported_os = is_sles_15_7 or is_tumbleweed %}
+{% set is_supported_os = is_sles_15_7 or is_ubuntu or is_tumbleweed %}
 
 {% if is_supported_os %}
 {% set helm_chart_directory = "/root/helm-charts" %}
@@ -44,7 +45,7 @@ key_exchange_kubernetes_server:
 
 ## Configure apparmor profile for RKE2
 
-{% if is_sles_15_7 %}
+{% if is_sles_15_7 or is_ubuntu %}
 configure_apparmor_profile_rke2:
   file.managed:
     - name: /etc/apparmor.d/k8s-systemd-uyuni
@@ -53,6 +54,35 @@ configure_apparmor_profile_rke2:
 apply_apparmor_profile:
   cmd.run:
     - name: apparmor_parser -r /etc/apparmor.d/k8s-systemd-uyuni
+
+{% endif %}
+
+## Configure SELinux for RKE2
+
+{% if is_tumbleweed %}
+
+copy_systemdcontainerpolicy_te:
+  file.managed:
+    - name: /root/systemdcontainerpolicy.te
+    - source: salt://server_kubernetes/systemdcontainerpolicy.te
+
+execute_checkmodule:
+  cmd.run:
+    - name: checkmodule -M -m -o /root/systemdcontainerpolicy.mod /root/systemdcontainerpolicy.te
+    - require:
+      - file: copy_systemdcontainerpolicy_te
+
+execute_semodule_package:
+  cmd.run:
+    - name: semodule_package -o /root/systemdcontainerpolicy.pp -m /root/systemdcontainerpolicy.mod
+    - require:
+      - cmd: execute_checkmodule
+
+execute_semodule_install:
+  cmd.run:
+    - name: semodule -i /root/systemdcontainerpolicy.pp
+    - require:
+      - cmd: execute_semodule_package
 
 {% endif %}
 
@@ -76,7 +106,7 @@ copy_value_yaml_file:
         fqdn: {{ grains.get("fqdn") }}
         cert_manager_namespace: {{ cert_manager_namespace }}
         container_repository: {{ grains.get("container_repository")}}
-        app_armor_name: {{ 'k8s-systemd-uyuni' if is_sles_15_7 else '' }}
+        app_armor_name: {{ 'k8s-systemd-uyuni' if is_sles_15_7 or is_ubuntu else '' }}
 
 copy_chart_yaml_file:
   file.managed:

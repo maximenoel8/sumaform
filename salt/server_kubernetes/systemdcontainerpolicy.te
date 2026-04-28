@@ -1,0 +1,29 @@
+module systemdcontainerpolicy 1.0;
+
+require {
+    type container_t;
+    type cgroup_t;
+    type tmpfs_t;
+    type proc_t;
+
+    class dir { search write add_name create remove_name rmdir setattr getattr mounton search };
+    class file { create open write append read unlink setattr getattr watch };
+    class filesystem { mount getattr relabelfrom relabelto remount unmount };
+}
+
+#============= container_t ==============
+allow container_t cgroup_t:dir { add_name create remove_name rmdir setattr write search getattr };
+allow container_t cgroup_t:file { create open write append read setattr getattr unlink watch };
+allow container_t cgroup_t:filesystem { mount getattr relabelfrom relabelto };
+
+# Allow systemd's credential helper (sd-mkdcreds) to use /dev/shm as a mount point for service credentials.
+allow container_t tmpfs_t:dir mounton;
+
+# Standard lookups and attributes for the mount point
+allow container_t tmpfs_t:dir { getattr search };
+
+# Allow systemd to mount/remount the proc filesystem for namespacing
+allow container_t proc_t:filesystem { mount remount unmount };
+
+# Required to use directories as mount points
+allow container_t proc_t:dir mounton;
