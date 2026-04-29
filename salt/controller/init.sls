@@ -33,6 +33,7 @@ cucumber_requisites:
       - make
       - wget
       - ruby3.3
+      - ruby3.3-devel
       - ca-certificates-mozilla
       - apache2-worker
       - apache2-mod_nss
