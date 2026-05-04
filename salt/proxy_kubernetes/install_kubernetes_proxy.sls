@@ -1,4 +1,5 @@
 {% set osfullname = grains['osfullname'] %}
+{% set osrelease = grains['osrelease'] %}
 {% set kubeconfig = "/etc/rancher/rke2/rke2.yaml" %}
 {% set cert_manager_namespace = "cert-manager" %}
 {% set helm_chart_directory = "/root/helm-charts" %}
@@ -8,9 +9,13 @@
 {% set helm_chart_url = grains.get('helm_chart_url') %}
 {% set python_helm_chart_path = "/root/helm_chart.py" %}
 {% set devel_flag = "--devel" if grains.get('use_devel_oci') else "" %}
+{% set is_sles_15_7 = osfullname == 'SLES' and osrelease == '15.7' %}
+{% set is_ubuntu = osfullname == 'Ubuntu' %}
+{% set is_tumbleweed = osfullname == 'openSUSE Tumbleweed' %}
+{% set is_supported_os = is_sles_15_7 or is_ubuntu or is_tumbleweed %}
 
 
-{% if osfullname in ['Ubuntu', 'openSUSE Tumbleweed', 'SLES'] %}
+{% if is_supported_os %}
 
 {% set pkg_map = {
   'openSUSE Tumbleweed' : 'jq'
