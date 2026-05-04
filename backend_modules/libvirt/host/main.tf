@@ -261,6 +261,10 @@ resource "terraform_data" "provisioning" {
     })
   }
 
+  provisioner "local-exec" {
+    command = "sleep 40"
+  }
+
   count = var.provision ? var.quantity : 0
 
   connection {
