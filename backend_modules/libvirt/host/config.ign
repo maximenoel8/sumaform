@@ -7,16 +7,28 @@
         "passwordHash": "ZIy6Ivgw8UdAs"
       }
     ]
-  }%{ if dhcp_dns },
+  },
   "storage": {
     "files": [
       {
         "path": "/etc/sysconfig/network/ifcfg-eth0",
         "contents": {
-          "source": "data:,BOOTPROTO%3D'static'%0AIPADDR%3D'${dhcp_dns_address}'%0ASTARTMODE%3D'auto'%0AUSERCONTROL%3D'no'%0A"
+%{ if dhcp_dns ~}
+          "source": "data:,BOOTPROTO%3D'static'%0AIPADDR%3D'${dhcp_dns_address}'%0ASTARTMODE%3D'auto'%0AUSERCONTROL%3D'no'%0AIPV6INIT%3Dno%0AIPV6_AUTOCONF%3Dno%0A"
+%{ else ~}
+          "source": "data:,BOOTPROTO%3D'dhcp'%0ASTARTMODE%3D'auto'%0AUSERCONTROL%3D'no'%0AIPV6INIT%3Dno%0AIPV6_AUTOCONF%3Dno%0A"
+%{ endif ~}
         },
         "mode": 420
       }
     ]
-  }%{ endif }
+  },
+  "systemd": {
+    "units": [
+      {
+        "name": "wicked.service",
+        "enabled": true
+      }
+    ]
+  }
 }

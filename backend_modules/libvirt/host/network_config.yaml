@@ -1,24 +1,15 @@
-%{ if image == "debian12o" || image == "debian13o" || image == "amazonlinux2023o" }
 network:
   version: 2
   ethernets:
+%{ if image == "debian12o" || image == "debian13o" || image == "amazonlinux2023o" || image == "ubuntu2404o" || image == "ubuntu2204o" || image == "slmicro62o" }
     ens3:
-      dhcp4: true
 %{ else }
-network:
-  version: 1
-  config:
-  - type: physical
-%{ if image == "ubuntu2404o" || image == "ubuntu2204o" || image == "slmicro62o" }
-    name: ens3
-%{ else }
-    name: eth0
+    eth0:
 %{ endif }
-    subnets:
+      dhcp6: false
 %{ if dhcp_dns }
-      - type: static
-        address: ${dhcp_dns_address}
+      dhcp4: false
+      addresses: ['${dhcp_dns_address}/24']
 %{ else }
-      - type: dhcp4
-%{ endif }
+      dhcp4: true
 %{ endif }
