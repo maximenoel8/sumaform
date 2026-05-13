@@ -11,6 +11,14 @@
   "storage": {
     "files": [
       {
+        "path": "/etc/sysctl.d/70-disable-ipv6.conf",
+        "overwrite": true,
+        "contents": {
+          "source": "data:,net.ipv6.conf.all.disable_ipv6%3D1%0Anet.ipv6.conf.default.disable_ipv6%3D1%0A"
+        },
+        "mode": 420
+      },
+      {
         "path": "/etc/sysconfig/network/ifcfg-eth0",
         "overwrite": true,
         "contents": {
