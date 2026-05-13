@@ -7,5 +7,16 @@
         "passwordHash": "ZIy6Ivgw8UdAs"
       }
     ]
-  }
+  }%{ if dhcp_dns },
+  "storage": {
+    "files": [
+      {
+        "path": "/etc/sysconfig/network/ifcfg-eth0",
+        "contents": {
+          "source": "data:,BOOTPROTO%3D'static'%0AIPADDR%3D'${dhcp_dns_address}'%0ASTARTMODE%3D'auto'%0AUSERCONTROL%3D'no'%0A"
+        },
+        "mode": 420
+      }
+    ]
+  }%{ endif }
 }
