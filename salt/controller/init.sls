@@ -1,6 +1,7 @@
 include:
   - repos
   - controller.apache_https
+  - controller.testsuite_pytest
 
 ssh_private_key:
   file.managed:
