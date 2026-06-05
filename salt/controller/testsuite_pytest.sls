@@ -12,6 +12,7 @@ testsuite_system_packages:
       - python311
       - python311-pip
       - chromium
+      - nodejs20
 
 # ── 2. Python dependencies via pip ───────────────────────────────────────────
 
@@ -30,7 +31,19 @@ testsuite_pip_packages:
     - require:
       - pkg: testsuite_system_packages
 
-# ── 3. Playwright environment variables (system-wide) ────────────────────────
+# ── 3. Node.js dependencies for Cucumber HTML report generation ──────────────
+#
+# index.cjs uses multiple-cucumber-html-reporter as a library (require()).
+# npm20 is the npm binary provided by the nodejs20 package on openSUSE/SLES.
+
+testsuite_npm_packages:
+  cmd.run:
+    - name: npm20 install
+    - cwd: /root/spacewalk/testsuite
+    - require:
+      - pkg: testsuite_system_packages
+
+# ── 4. Playwright environment variables (system-wide) ────────────────────────
 #
 # Tells Playwright to use the system Chromium binary and skip its own browser
 # download (which would fail on openSUSE with no apt-get available).
