@@ -239,6 +239,7 @@ module "proxy_containerized" {
   auto_configure       = false
   ssh_key_path         = var.controller_public_ssh_key_path
   provision            = true
+  use_os_released_updates   = false
 
   additional_repos     = var.proxy_additional_repos
 }
