@@ -24,6 +24,12 @@ ca_suse_repo:
     - refresh: True
     - gpgkey: http://{{ grains.get("mirror") | default("download.opensuse.org", true) }}/repositories/SUSE:/CA/SLE_15_SP7/repodata/repomd.xml.key
 
+install_suse_ca_certificates:
+  pkg.installed:
+    - name: ca-certificates-suse
+    - require:
+      - pkgrepo: ca_suse_repo
+
 containers_pool_repo:
   pkgrepo.managed:
     - baseurl: http://{{ grains.get("mirror") | default("dist.suse.de/ibs", true) }}/SUSE/Products/SLE-Module-Containers/15-SP7/{{ grains.get("cpuarch") }}/product
