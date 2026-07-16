@@ -31,6 +31,16 @@ minimal_package_update:
     - name: RPM_SEQUOIA_CRYPTO_POLICY=/usr/share/crypto-policies/LEGACY/rpm-sequoia.txt dnf -y upgrade salt-minion
 {% endif %}
     - order: last
+{% elif grains['os_family'] == 'Debian' and grains['install_salt_bundle'] %}
+  {# WORKAROUND: the DPkg::Post-Invoke hook shipped by venv-salt-minion (venv-dpkgnotify)
+     runs the bundled python mid-upgrade, before the new bundle's libpython symlinks are
+     configured, so apt exits non-zero even though dpkg succeeded. Retry once: the second
+     run is a no-op whose hook now succeeds; genuine failures still fail twice. #}
+  cmd.run:
+    - name: apt-get -y install --only-upgrade venv-salt-minion || apt-get -y install --only-upgrade venv-salt-minion
+    - env:
+      - DEBIAN_FRONTEND: noninteractive
+    - order: last
 {% else %}
   pkg.latest:
     - pkgs:
