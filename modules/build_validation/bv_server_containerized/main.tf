@@ -44,6 +44,9 @@ module "server_containerized" {
   deploy_saline           = var.deploy_saline
   deploy_hub_api          = var.deploy_hub_api
 
+  hub_peripheral_fqdns  = var.hub_peripheral_fqdns
+  server_hub_peripheral = var.server_hub_peripheral
+
   additional_repos = var.additional_repos
 }
 

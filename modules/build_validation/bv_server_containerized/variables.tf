@@ -87,4 +87,13 @@ variable "deploy_hub_api" {
   default     = true
 }
 
+variable "hub_peripheral_fqdns" {
+  type    = list(string)
+  default = []
+}
+
+variable "server_hub_peripheral" {
+  type    = string
+  default = null
+}
 
