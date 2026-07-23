@@ -1,4 +1,5 @@
 {% set runtime = grains.get('container_runtime') | default('podman', true) %}
+{% set skip_server_install = grains.get('skip_server_install') | default(false, true) %}
 include:
   {% if 'build_image' not in grains.get('product_version') | default('', true) %}
   - repos
@@ -8,7 +9,9 @@ include:
   - server_containerized.install_mgradm
   - server_containerized.hub_peripheral_certs
   - server_containerized.hub_peripheral
+  {% if not skip_server_install %}
   - server_containerized.initial_content
   - server_containerized.rhn
   - server_containerized.large_deployment
+  {% endif %}
   - server_containerized.testsuite

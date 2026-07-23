@@ -161,6 +161,7 @@ module "server_containerized" {
   deploy_hub_api                 = try(var.environment_configuration.server_containerized.deploy_hub_api, true)
 
   hub_peripheral_fqdns           = local.peripheral_hub_fqdns
+  skip_server_install            = try(var.environment_configuration.server_containerized.skip_server_install, false)
 
   additional_repos               = var.server_additional_repos
 }
@@ -181,6 +182,7 @@ module "server2_containerized" {
   deploy_saline           = try(var.environment_configuration.server2_containerized.deploy_saline, true)
   deploy_hub_api          = try(var.environment_configuration.server2_containerized.deploy_hub_api, true)
   server_hub_peripheral   = (length(module.server_containerized) > 0 && try(var.environment_configuration.server_containerized.deploy_hub_api, true)) ? module.server_containerized[0].configuration.hostname : null
+  skip_server_install     = try(var.environment_configuration.server2_containerized.skip_server_install, false)
   additional_repos   = var.server_additional_repos
   ssh_key_path       = var.controller_public_ssh_key_path
 }
@@ -201,6 +203,7 @@ module "server3_containerized" {
   deploy_saline           = try(var.environment_configuration.server3_containerized.deploy_saline, true)
   deploy_hub_api          = try(var.environment_configuration.server3_containerized.deploy_hub_api, true)
   server_hub_peripheral   = (length(module.server_containerized) > 0 && try(var.environment_configuration.server_containerized.deploy_hub_api, true)) ? module.server_containerized[0].configuration.hostname : null
+  skip_server_install     = try(var.environment_configuration.server3_containerized.skip_server_install, false)
   additional_repos   = var.server_additional_repos
   ssh_key_path       = var.controller_public_ssh_key_path
 }
@@ -221,6 +224,7 @@ module "server4_containerized" {
   deploy_saline           = try(var.environment_configuration.server4_containerized.deploy_saline, true)
   deploy_hub_api          = try(var.environment_configuration.server4_containerized.deploy_hub_api, true)
   server_hub_peripheral   = (length(module.server_containerized) > 0 && try(var.environment_configuration.server_containerized.deploy_hub_api, true)) ? module.server_containerized[0].configuration.hostname : null
+  skip_server_install     = try(var.environment_configuration.server4_containerized.skip_server_install, false)
   additional_repos   = var.server_additional_repos
   ssh_key_path       = var.controller_public_ssh_key_path
 }

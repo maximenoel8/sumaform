@@ -46,6 +46,7 @@ module "server_containerized" {
 
   hub_peripheral_fqdns  = var.hub_peripheral_fqdns
   server_hub_peripheral = var.server_hub_peripheral
+  skip_server_install   = var.skip_server_install
 
   additional_repos = var.additional_repos
 }

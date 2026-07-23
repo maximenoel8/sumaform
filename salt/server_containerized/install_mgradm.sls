@@ -1,10 +1,12 @@
+{% set skip_server_install = grains.get('skip_server_install') | default(false, true) %}
+
 mgradm_config:
   file.managed:
     - name: /root/mgradm.yaml
     - source: salt://server_containerized/mgradm.yaml
     - template: jinja
 
-{% if not (grains.get('server_hub_peripheral') | default(false, true)) %}
+{% if not (grains.get('server_hub_peripheral') | default(false, true)) and not skip_server_install %}
 mgradm_install:
   cmd.run:
     - name: mgradm install podman --logLevel=debug --config /root/mgradm.yaml {{ grains['fqdn'] }}
