@@ -14,11 +14,11 @@ locals {
 }
 
 locals {
-  peripheral_hub_fqdns = compact([
+  peripheral_hub_fqdns = try(var.environment_configuration.server_containerized.deploy_hub_api, true) ? compact([
     try("${var.environment_configuration.name_prefix}${var.environment_configuration.server2_containerized.name}.${var.platform_location_configuration[var.location].domain}", ""),
     try("${var.environment_configuration.name_prefix}${var.environment_configuration.server3_containerized.name}.${var.platform_location_configuration[var.location].domain}", ""),
     try("${var.environment_configuration.name_prefix}${var.environment_configuration.server4_containerized.name}.${var.platform_location_configuration[var.location].domain}", ""),
-  ])
+  ]) : []
 }
 
 provider "libvirt" {
@@ -180,7 +180,7 @@ module "server2_containerized" {
   deploy_coco_attestation = try(var.environment_configuration.server2_containerized.deploy_coco_attestation, true)
   deploy_saline           = try(var.environment_configuration.server2_containerized.deploy_saline, true)
   deploy_hub_api          = try(var.environment_configuration.server2_containerized.deploy_hub_api, true)
-  server_hub_peripheral   = length(module.server_containerized) > 0 ? module.server_containerized[0].configuration.hostname : null
+  server_hub_peripheral   = (length(module.server_containerized) > 0 && try(var.environment_configuration.server_containerized.deploy_hub_api, true)) ? module.server_containerized[0].configuration.hostname : null
   additional_repos   = var.server_additional_repos
   ssh_key_path       = var.controller_public_ssh_key_path
 }
@@ -200,7 +200,7 @@ module "server3_containerized" {
   deploy_coco_attestation = try(var.environment_configuration.server3_containerized.deploy_coco_attestation, true)
   deploy_saline           = try(var.environment_configuration.server3_containerized.deploy_saline, true)
   deploy_hub_api          = try(var.environment_configuration.server3_containerized.deploy_hub_api, true)
-  server_hub_peripheral   = length(module.server_containerized) > 0 ? module.server_containerized[0].configuration.hostname : null
+  server_hub_peripheral   = (length(module.server_containerized) > 0 && try(var.environment_configuration.server_containerized.deploy_hub_api, true)) ? module.server_containerized[0].configuration.hostname : null
   additional_repos   = var.server_additional_repos
   ssh_key_path       = var.controller_public_ssh_key_path
 }
@@ -220,7 +220,7 @@ module "server4_containerized" {
   deploy_coco_attestation = try(var.environment_configuration.server4_containerized.deploy_coco_attestation, true)
   deploy_saline           = try(var.environment_configuration.server4_containerized.deploy_saline, true)
   deploy_hub_api          = try(var.environment_configuration.server4_containerized.deploy_hub_api, true)
-  server_hub_peripheral   = length(module.server_containerized) > 0 ? module.server_containerized[0].configuration.hostname : null
+  server_hub_peripheral   = (length(module.server_containerized) > 0 && try(var.environment_configuration.server_containerized.deploy_hub_api, true)) ? module.server_containerized[0].configuration.hostname : null
   additional_repos   = var.server_additional_repos
   ssh_key_path       = var.controller_public_ssh_key_path
 }
