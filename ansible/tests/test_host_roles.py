@@ -308,3 +308,10 @@ def test_base_ports_salt_avahi_state():
     t = (A / "roles" / "base" / "tasks" / "avahi.yml").read_text()
     assert "avahi.yml" in c and "avahi-daemon" in t and "mdns4" in t and "use-ipv6=no" in t
     assert (A / "roles" / "base" / "files" / "set_ip_in_etc_hosts.py").read_bytes() == (ROOT / "salt" / "default" / "set_ip_in_etc_hosts.py").read_bytes()
+
+
+def test_hosts_without_the_minion_role_still_get_the_salt_minion_package():
+    t = (A / "roles" / "base" / "tasks" / "configure.yml").read_text()
+    assert "venv-salt-minion" in t and "'minion' not in roles" in t
+    fw = next(l for l in t.splitlines() if "SuSEfirewall2" in l and "loop:" in l)
+    assert "ufw" not in fw.split("#")[0]

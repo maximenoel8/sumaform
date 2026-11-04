@@ -4,6 +4,16 @@
   ansible.builtin.hostname:
     name: "{{ hostname | default(inventory_hostname) }}"
 
+# Salt's first boot installs the Salt minion package on every host, whatever its host role (the minion role
+# configures it where it is used). Without it the testsuite's onboarding and bootstrap checks see a different host.
+- name: The Salt minion package on hosts that are not minions
+  ansible.builtin.include_role:
+    name: packages
+    tasks_from: install
+  vars:
+    install_packages: ["{{ 'venv-salt-minion' if install_salt_bundle | default(true) | bool else 'salt-minion' }}"]
+  when: not (is_transactional | bool) and 'minion' not in roles
+
 - name: Avahi (use_avahi)
   ansible.builtin.include_tasks: avahi.yml
 
@@ -46,6 +56,6 @@
     name: "{{ item }}"
     state: stopped
     enabled: false
-  loop: [firewalld, SuSEfirewall2, ufw]
+  loop: [firewalld, SuSEfirewall2]   # as salt/default/firewall.sls: ufw is left alone
   failed_when: false
   when: disable_firewall | default(true) | bool
