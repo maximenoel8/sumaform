@@ -8,6 +8,8 @@ hosts.json is a list of {name, address, user, port, bastion|null, roles, vars[, 
 Writes <outdir>/hosts.yml (no secrets) and <outdir>/host_vars/<name>.yml (0600).
 Env SUMAFORM_VM_PASSWORD, if non-empty, becomes ansible_password in host_vars
 (key auth is the default; this is the documented fallback; see ticket #122).
+Env SUMAFORM_KEY_DIR, if set, holds the per-deployment keypair (id_ed25519[.pub], made by run_host.sh): its halves
+become host_vars ssh_private_key / ssh_public_key and peer_public_keys = [the public key] (ticket #126).
 """
 import json
 import os
@@ -26,6 +28,11 @@ def write_private(path, data):
 def main(src, out):
     hosts = json.load(open(src))
     password = os.environ.get("SUMAFORM_VM_PASSWORD", "")
+    keys = {}
+    if os.environ.get("SUMAFORM_KEY_DIR"):
+        read = lambda n: open(os.path.join(os.environ["SUMAFORM_KEY_DIR"], n)).read().strip()
+        keys = {"ssh_private_key": read("id_ed25519"), "ssh_public_key": read("id_ed25519.pub"),
+                "peer_public_keys": [read("id_ed25519.pub")]}
     os.makedirs(os.path.join(out, "host_vars"), mode=0o700, exist_ok=True)
     os.chmod(os.path.join(out, "host_vars"), 0o700)
     inv = {"all": {"hosts": {}, "children": {}}}
@@ -41,7 +48,7 @@ def main(src, out):
         inv["all"]["hosts"][h["name"]] = entry
         for role in h["roles"]:
             inv["all"]["children"].setdefault(role, {"hosts": {}})["hosts"][h["name"]] = {}
-        hv = {**h.get("vars", {}), "roles": h["roles"]}
+        hv = {**h.get("vars", {}), **keys, "roles": h["roles"]}
         if password:
             hv["ansible_password"] = password
         write_private(os.path.join(out, "host_vars", f'{h["name"]}.yml'), hv)

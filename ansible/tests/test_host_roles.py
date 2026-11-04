@@ -248,5 +248,5 @@ def test_site_fails_early_without_keypair_and_points_to_smoke_todo():
 
 def test_libvirt_runs_script_relative_to_module_not_deployment():
     tf = (ROOT / "backend_modules/libvirt/host/main.tf").read_text()
-    assert "${path.root}/ansible" not in tf and "${path.module}/../../../ansible" in tf
+    assert "${path.root}/ansible/" not in tf and "${path.module}/../../../ansible" in tf
     assert (ROOT / "backend_modules/libvirt/host/../../../ansible/run_host.sh").exists()

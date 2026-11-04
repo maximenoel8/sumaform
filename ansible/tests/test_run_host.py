@@ -22,7 +22,7 @@ def run(tmp, host=HOST, rc=0):
     stub.chmod(stub.stat().st_mode | stat.S_IEXEC)
     env = {**os.environ, "PATH": f"{bindir}:{os.environ['PATH']}", "TMPDIR": str(tmp),
            "BUILD_NUMBER": "7", "HOST_JSON": json.dumps([host])}
-    return subprocess.run(["bash", str(SCRIPT)], env=env, capture_output=True, text=True)
+    return subprocess.run(["bash", str(SCRIPT)], env=env, capture_output=True, text=True, cwd=tmp)
 
 
 def test_one_run_with_host_role_playbook(tmp_path):
@@ -35,6 +35,16 @@ def test_one_run_with_host_role_playbook(tmp_path):
     # per-build dirs, scratch inventory removed afterwards
     assert (tmp_path / "ansible-build-7" / "home").is_dir()
     assert not list((tmp_path / "ansible-build-7").glob("host.*"))
+
+
+def test_deployment_keypair_made_once_and_reused(tmp_path):
+    assert run(tmp_path).returncode == 0
+    k = tmp_path / "ansible-keys"
+    priv, pub = (k / "id_ed25519").read_text(), (k / "id_ed25519.pub").read_text()
+    assert oct((k / "id_ed25519").stat().st_mode & 0o777) == "0o600" and pub.startswith("ssh-ed25519 ")
+    (tmp_path / "bin" / "ansible-playbook").unlink(); (tmp_path / "bin").rmdir()
+    assert run(tmp_path).returncode == 0
+    assert (k / "id_ed25519").read_text() == priv
 
 
 def test_scratch_dir_private(tmp_path):

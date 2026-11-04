@@ -6,6 +6,7 @@
 /.terraform/
 /.terraform.d/
 /main.tf
+/ansible-keys/
 .terraform.tfstate.lock.info
 
 /salt/virthost/*.qcow2

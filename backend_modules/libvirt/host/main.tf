@@ -486,9 +486,9 @@ locals {
         swap_file_size                = var.swap_file_size
         product_version               = local.product_version
         authorized_keys               = local.ansible_authorized_keys
-        // public keys of build_host and controller that server and proxy authorize (containerized_common).
-        // TODO(#126): base_configuration does not carry them yet; the per-deployment keypair generation is a user decision
-        peer_public_keys              = try(var.base_configuration["peer_public_keys"], [])
+        // public keys that server and proxy authorize (containerized_common). ssh_private_key, ssh_public_key and
+        // peer_public_keys are not set here: ansible/run_host.sh makes the per-deployment keypair on the worker
+        // (SUMAFORM_KEY_DIR) and inventory.py adds it to the host_vars, so no key material passes through Terraform values.
         gpg_keys                      = var.gpg_keys
         connect_to_base_network       = var.connect_to_base_network
         connect_to_additional_network = var.connect_to_additional_network
@@ -515,6 +515,7 @@ resource "terraform_data" "ansible" {
     environment = {
       HOST_JSON            = jsonencode([local.ansible_hosts[count.index]])
       SUMAFORM_VM_PASSWORD = var.vm_password
+      SUMAFORM_KEY_DIR     = "${path.root}/ansible-keys"
     }
     // the script lives in the sumaform checkout, not next to the deployment (path.root): three levels up from
     // backend_modules/<backend>/host. It finds ansible.cfg, roles and playbooks relative to itself.

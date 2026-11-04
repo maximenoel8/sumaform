@@ -37,6 +37,16 @@ def test_single_host_inventory(tmp_path):
     assert hv == {"domain": "tf.local", "install_salt_bundle": True, "roles": ["minion"]}
 
 
+def test_deployment_keypair_in_host_vars(tmp_path):
+    k = tmp_path / "keys"; k.mkdir()
+    (k / "id_ed25519").write_text("PRIV\n"); (k / "id_ed25519.pub").write_text("ssh-ed25519 AAA c\n")
+    r, out = gen(tmp_path, [HOST], env={"SUMAFORM_VM_PASSWORD": "", "SUMAFORM_KEY_DIR": str(k)})
+    assert r.returncode == 0, r.stderr
+    hv = yaml.safe_load((out / "host_vars" / "mini-1.yml").read_text())
+    assert hv["ssh_private_key"] == "PRIV" and hv["peer_public_keys"] == ["ssh-ed25519 AAA c"]
+    assert hv["ssh_public_key"] == "ssh-ed25519 AAA c"
+
+
 def test_bastion_becomes_proxyjump(tmp_path):
     host = {**HOST, "bastion": {"host": "jump.example", "user": "ec2", "port": 2222}}
     r, out = gen(tmp_path, [host])

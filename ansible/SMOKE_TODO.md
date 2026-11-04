@@ -27,7 +27,7 @@ roles marked "re-run"; the other roles are known not to be clean (see the `ponyt
   rebooted once into the new kernel and does not reboot on the second apply; the minion host role is still configured (re-run).
 - rhel_container: with `rhel_version` 9: image `ubi9-ssh` built, `ubi9-client` active, ssh to the container port (2222) works
   with the authorized key.
-- server_kubernetes and proxy_kubernetes: with per-deployment keys supplied (see "Before the kubernetes smoke"). Check
+- server_kubernetes and proxy_kubernetes: (keypair: see "Before the kubernetes smoke"). Check
   `/etc/rancher/rke2/config.yaml`, `/etc/profile.d/rke2_vars.sh`, `/root/helm-charts/selfsigned/{Chart,values}.yaml`, the
   ingress manifest, `/etc/profile.d/server_kubernetes_vars.sh` is mode 0600; on the proxy, `ssh <server>` works with no password
   and the proxy variables file reached the server. Then let the testsuite install RKE2 and the charts (the real proof).
@@ -36,11 +36,14 @@ roles marked "re-run"; the other roles are known not to be clean (see the `ponyt
   `provisioner = "ansible"` and these modules passes the plan-time precondition.
 - data_disk (mirror and jenkins): covered by their items; on an `nvme` data disk check the `p1` partition name.
 
-## Before the kubernetes smoke (user decision, open since #126)
+## Before the kubernetes smoke (decided 2026-11-04)
 
-`peer_public_keys`, `ssh_private_key` and `ssh_public_key` are read from host vars but the Terraform handoff does not
-generate them yet (`backend_modules/libvirt/host/main.tf`, `TODO(#126)`). The kubernetes roles stop at the keypair task
-until that exists, like the containerized server and proxy.
+The per-deployment keypair is made by `ansible/run_host.sh` on the worker (`$SUMAFORM_KEY_DIR`, default
+`<deployment dir>/ansible-keys`, first host run makes it under a lock, later runs and the next apply reuse it) and
+`inventory.py` adds `ssh_private_key`, `ssh_public_key` and `peer_public_keys = [the public key]` to the host_vars. One
+shared pair stands in for the Salt controller and build_host keys. No Terraform provider, no key in Terraform values.
+Check: the pair exists with mode 0600 after the first host run, the same fingerprint is in `/root/.ssh/authorized_keys`
+of server and proxy, and a fresh workspace (no `ansible-keys/`) makes a new pair that the second apply installs.
 
 ## Leftovers recorded for earlier roles (from the code, no commit message holds any)
 
