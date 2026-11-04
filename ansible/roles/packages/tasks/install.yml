@@ -9,8 +9,17 @@
     tu_packages: "{{ install_packages }}"
   when: is_transactional | bool and install_packages | length > 0
 
+# Salt's pkg.installed takes recommended packages (sumaform's zypp.conf sets solver.onlyRequires = false); the
+# Ansible zypper module defaults to --no-recommends, which left the controller without e.g. apache2-utils, w3m, polkit.
+- name: Install packages (zypper, with recommends like Salt)
+  community.general.zypper:
+    name: "{{ install_packages }}"
+    state: present
+    disable_recommends: false
+  when: not (is_transactional | bool) and install_packages | length > 0 and ansible_facts.pkg_mgr in ['zypper', 'community.general.zypper']
+
 - name: Install packages
   ansible.builtin.package:
     name: "{{ install_packages }}"
     state: present
-  when: not (is_transactional | bool) and install_packages | length > 0
+  when: not (is_transactional | bool) and install_packages | length > 0 and ansible_facts.pkg_mgr not in ['zypper', 'community.general.zypper']

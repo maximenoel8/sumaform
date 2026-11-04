@@ -289,3 +289,8 @@ def test_templates_ported_from_salt_keep_salts_newline_handling():
     # export MINION="x"export BUILD_HOST="y" on one line (sanity check: getaddrinfo failed)
     bad = [str(p) for p in (A / "roles").glob("*/templates/*.j2") if not p.read_text().startswith("#jinja2: trim_blocks: False\n")]
     assert not bad, bad
+
+
+def test_zypper_installs_take_recommends_like_salt():
+    t = (A / "roles" / "packages" / "tasks" / "install.yml").read_text()
+    assert "community.general.zypper" in t and "disable_recommends: false" in t
