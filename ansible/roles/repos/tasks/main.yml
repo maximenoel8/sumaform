@@ -11,6 +11,13 @@
     repos_plan_result: "{{ repos_catalog | repos_plan(ansible_facts, hostvars[inventory_hostname]) }}"
   no_log: true   # SCC registration commands carry the registration code
 
+- name: Directories of the config files (e.g. /etc/zypp/zypp.conf.d does not exist on a fresh image)
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ repos_plan_result.files | selectattr('state', 'equalto', 'present') | map(attribute='path') | map('dirname') | unique | list }}"
+
 - name: Config files
   ansible.builtin.copy:
     content: "{{ item.content }}"
@@ -47,19 +54,19 @@
     src: "{{ repos_key_root }}/{{ item.file }}"
     dest: "/tmp/{{ item.file | basename }}"
     mode: "0644"
-  loop: "{{ repos_plan_result.keys | rejectattr('transactional') | list }}"
+  loop: "{{ repos_plan_result['keys'] | rejectattr('transactional') | list }}"
   loop_control: {label: "{{ item.name }}"}
 
 - name: Import keys
   ansible.builtin.command: "rpm --import /tmp/{{ item.file | basename }}"
   environment: "{{ item.env }}"
   changed_when: false   # importing an imported key is a no-op
-  loop: "{{ repos_plan_result.keys | rejectattr('transactional') | list }}"
+  loop: "{{ repos_plan_result['keys'] | rejectattr('transactional') | list }}"
   loop_control: {label: "{{ item.name }}"}
 
 - name: Import keys inside a transactional snapshot (reboot handling is ticket #123)
   ansible.builtin.command: "transactional-update -c run rpm --import {{ item.url }}"
-  loop: "{{ repos_plan_result.keys | selectattr('transactional') | list }}"
+  loop: "{{ repos_plan_result['keys'] | selectattr('transactional') | list }}"
   loop_control: {label: "{{ item.name }}"}
 
 - name: Copy gpg_keys host var entries
@@ -139,7 +146,7 @@
   loop_control: {label: "{{ item.label }}"}
 
 - name: Update the certificate store
-  ansible.builtin.command: "{{ repos_plan_result.certs[0].update }}"
+  ansible.builtin.command: "{{ repos_plan_result.certs[0]['update'] }}"
   when: repos_plan_result.certs | length > 0 and _repos_certs is changed
 
 - name: Commands after repositories (refresh)

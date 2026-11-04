@@ -259,3 +259,14 @@ def test_ansible_first_boot_installs_guest_agent_on_non_suse_images():
     # Salt's first boot installs the agent on exactly these images, so the Ansible one must too
     salt = (ROOT / "backend_modules/libvirt/host/user_data.yaml").read_text()
     assert "qemu-guest-agent" in salt.split('image == "ubuntu2404o"', 1)[1]
+
+
+def test_repos_role_avoids_dict_method_names_and_creates_config_dirs():
+    t = (A / "roles" / "repos" / "tasks" / "main.yml").read_text()
+    assert "repos_plan_result.keys" not in t and "repos_plan_result.certs[0].update" not in t  # dict methods
+    assert t.index("Directories of the config files") < t.index("- name: Config files")
+
+
+def test_non_suse_first_boot_allows_root_password_login():
+    ud = (ROOT / "backend_modules/libvirt/host/user_data_ansible.yaml").read_text()
+    assert "00-sumaform.conf" in ud and "PermitRootLogin yes" in ud
