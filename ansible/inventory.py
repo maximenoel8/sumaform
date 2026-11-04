@@ -13,6 +13,7 @@ become host_vars ssh_private_key / ssh_public_key and peer_public_keys = [the pu
 """
 import json
 import os
+import shutil
 import sys
 
 import yaml
@@ -45,6 +46,10 @@ def main(src, out):
         if b and b.get("host"):
             jump = f'{b.get("user") or "root"}@{b["host"]}:{b.get("port") or 22}'
             entry["ansible_ssh_common_args"] = f"-J {jump}"
+        # the ssh plugin needs sshpass for a password; without it (and without a jump host, which paramiko cannot do)
+        # use the pure-Python paramiko connection (pinned in requirements.txt)
+        if password and not entry.get("ansible_ssh_common_args") and not shutil.which("sshpass"):
+            entry["ansible_connection"] = "paramiko"
         inv["all"]["hosts"][h["name"]] = entry
         for role in h["roles"]:
             inv["all"]["children"].setdefault(role, {"hosts": {}})["hosts"][h["name"]] = {}

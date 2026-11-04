@@ -61,3 +61,17 @@ def test_password_only_in_0600_host_vars(tmp_path):
     assert yaml.safe_load(f.read_text())["ansible_password"] == "s3cret"
     assert stat.S_IMODE(f.stat().st_mode) == 0o600
     assert stat.S_IMODE((out / "host_vars").stat().st_mode) == 0o700
+
+
+def test_password_without_sshpass_uses_paramiko_but_not_behind_a_jump_host(tmp_path):
+    empty = tmp_path / "nobin"
+    empty.mkdir()
+    env = {"SUMAFORM_VM_PASSWORD": "pw", "PATH": str(empty)}  # no sshpass on PATH
+    r, out = gen(tmp_path, [HOST], env=env)
+    assert r.returncode == 0, r.stderr
+    host = yaml.safe_load((out / "hosts.yml").read_text())["all"]["hosts"]["mini-1"]
+    assert host["ansible_connection"] == "paramiko"
+    (tmp_path / "j").mkdir()
+    jump = {**HOST, "bastion": {"host": "jump.example", "user": "root", "port": 22}}
+    r, out = gen(tmp_path / "j", [jump], env=env)
+    assert "ansible_connection" not in yaml.safe_load((out / "hosts.yml").read_text())["all"]["hosts"]["mini-1"]

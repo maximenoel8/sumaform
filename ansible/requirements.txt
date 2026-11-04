@@ -2,3 +2,5 @@
 #   python3.11 -m venv /opt/ansible-venv && /opt/ansible-venv/bin/pip install -r ansible/requirements.txt
 # ansible-core 2.16 needs controller Python 3.10-3.12 (not the 3.6 distro default of Leap 15.6).
 ansible-core==2.16.14
+# password logins without sshpass (inventory.py falls back to the paramiko connection)
+paramiko==3.4.0
