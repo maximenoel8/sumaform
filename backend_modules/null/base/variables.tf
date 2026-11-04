@@ -94,7 +94,7 @@ variable "product_version" {
 variable "provisioner" {
   description = "How hosts are configured after first boot: salt (default) or ansible (libvirt only, minion host role only for now)"
   type        = string
-  default     = "salt"
+  default     = "ansible"
   validation {
     condition     = contains(["salt", "ansible"], var.provisioner)
     error_message = "provisioner must be \"salt\" or \"ansible\"."
