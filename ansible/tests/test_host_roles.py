@@ -277,3 +277,8 @@ def test_apt_hosts_refresh_metadata_after_the_repos_are_written():
     assert "refresh_repos_apt" in cat and "apt-get -yq update" in cat
     ud = (ROOT / "backend_modules/libvirt/host/user_data_ansible.yaml").read_text()
     assert ud.count("00-sumaform.conf") == 1 and "%{ if install_guest_agent ~}\n# 00-" not in ud  # ssh drop-in is for every image
+
+
+def test_every_host_authorizes_the_deployment_key_in_base_prepare():
+    t = (A / "roles" / "base" / "tasks" / "prepare.yml").read_text()
+    assert "peer_public_keys" in t and t.index("peer_public_keys") < t.index("- name: Gather facts")

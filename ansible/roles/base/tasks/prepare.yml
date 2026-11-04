@@ -9,6 +9,23 @@
   changed_when: false
   failed_when: false
 
+# The controller holds the per-deployment key (ssh_keypair), not the Salt one the first boot authorized, and the
+# testsuite logs in from it to every host. Authorize it everywhere, before anything else can fail.
+- name: The root ssh directory exists
+  ansible.builtin.file:
+    path: /root/.ssh
+    state: directory
+    mode: "0700"
+
+- name: Authorize the deployment public key (peer_public_keys)
+  ansible.builtin.lineinfile:
+    path: /root/.ssh/authorized_keys
+    line: "{{ item }}"
+    create: true
+    mode: "0600"
+  loop: "{{ peer_public_keys | default([]) }}"
+  loop_control: {label: "{{ item.split(' ')[-1] }}"}
+
 - name: Gather facts
   ansible.builtin.setup:
 
