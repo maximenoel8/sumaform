@@ -68,7 +68,8 @@ locals {
   )
 
   user_data = local.is_ansible ? templatefile("${path.module}/user_data_ansible.yaml", {
-    authorized_keys = jsonencode(local.ansible_authorized_keys)
+    authorized_keys     = jsonencode(local.ansible_authorized_keys)
+    install_guest_agent = !can(regex("^(sles|opensuse|slmicro|slemicro|tumbleweed)", var.image))
   }) : templatefile("${path.module}/user_data.yaml", {
     image               = var.image
     use_mirror_images   = var.base_configuration["use_mirror_images"]

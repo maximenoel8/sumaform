@@ -15,6 +15,13 @@ users:
   - name: root
     ssh_authorized_keys: ${authorized_keys}
 
-package_update: false
+# SUSE images ship python3 and the qemu guest agent. The others do not, and with a bridge the libvirt provider
+# needs the agent to read the IP, so the domain would time out without it (Salt's user_data installs it too).
+package_update: ${install_guest_agent}
 packages:
   - python3
+%{ if install_guest_agent ~}
+  - qemu-guest-agent
+runcmd:
+  - systemctl enable --now qemu-guest-agent
+%{ endif ~}

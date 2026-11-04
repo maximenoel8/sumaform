@@ -250,3 +250,12 @@ def test_libvirt_runs_script_relative_to_module_not_deployment():
     tf = (ROOT / "backend_modules/libvirt/host/main.tf").read_text()
     assert "${path.root}/ansible/" not in tf and "${path.module}/../../../ansible" in tf
     assert (ROOT / "backend_modules/libvirt/host/../../../ansible/run_host.sh").exists()
+
+
+def test_ansible_first_boot_installs_guest_agent_on_non_suse_images():
+    tf = (ROOT / "backend_modules/libvirt/host/main.tf").read_text()
+    ud = (ROOT / "backend_modules/libvirt/host/user_data_ansible.yaml").read_text()
+    assert "install_guest_agent" in tf and "qemu-guest-agent" in ud and "package_update: ${install_guest_agent}" in ud
+    # Salt's first boot installs the agent on exactly these images, so the Ansible one must too
+    salt = (ROOT / "backend_modules/libvirt/host/user_data.yaml").read_text()
+    assert "qemu-guest-agent" in salt.split('image == "ubuntu2404o"', 1)[1]
