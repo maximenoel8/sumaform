@@ -1,3 +1,4 @@
+#jinja2: trim_blocks: False
 {%- set version = rhel_version | string -%}
 {%- set pkg_manager = 'yum' if version == '7' else 'dnf' -%}
 {%- set ssh_port = container_ssh_port | default(2222, true) -%}

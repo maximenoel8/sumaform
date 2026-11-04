@@ -1,3 +1,4 @@
+#jinja2: trim_blocks: False
 {% set storage_class = kubernetes_storage_class | default('local-path', true) %}
 {% set local_path = local_path_provisioner_path | default('/opt/local-path-provisioner', true) %}
 {% set var_pgsql_host_path = kubernetes_var_pgsql_host_path | default(local_path ~ '/var-pgsql18', true) %}

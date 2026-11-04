@@ -1,3 +1,4 @@
+#jinja2: trim_blocks: False
 {# grains.get(...) below reads the host vars, 1:1 with the Salt grain names #}
 {% set grains = hostvars[inventory_hostname] %}
 #### Environment variables used by test suite

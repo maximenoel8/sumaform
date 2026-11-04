@@ -282,3 +282,10 @@ def test_apt_hosts_refresh_metadata_after_the_repos_are_written():
 def test_every_host_authorizes_the_deployment_key_in_base_prepare():
     t = (A / "roles" / "base" / "tasks" / "prepare.yml").read_text()
     assert "peer_public_keys" in t and t.index("peer_public_keys") < t.index("- name: Gather facts")
+
+
+def test_templates_ported_from_salt_keep_salts_newline_handling():
+    # Ansible trims the newline after a block tag by default, Salt does not: bashrc.j2 rendered
+    # export MINION="x"export BUILD_HOST="y" on one line (sanity check: getaddrinfo failed)
+    bad = [str(p) for p in (A / "roles").glob("*/templates/*.j2") if not p.read_text().startswith("#jinja2: trim_blocks: False\n")]
+    assert not bad, bad
