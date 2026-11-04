@@ -11,6 +11,7 @@ base="${TMPDIR:-/tmp}/ansible-build-${BUILD_NUMBER:-$$-$RANDOM}"
 mkdir -p "$base/home" "$base/local" "$base/remote"
 export ANSIBLE_HOME="$base/home" ANSIBLE_LOCAL_TEMP="$base/local" ANSIBLE_REMOTE_TEMP="$base/remote"
 export ANSIBLE_CONFIG="$here/ansible.cfg"
+. "$here/worker/ensure_ansible.sh"
 
 export SUMAFORM_KEY_DIR="${SUMAFORM_KEY_DIR:-$PWD/ansible-keys}"
 mkdir -p "$SUMAFORM_KEY_DIR"

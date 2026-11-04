@@ -61,3 +61,25 @@ def test_multi_role_host_is_one_run(tmp_path):
     assert run(tmp_path, host).returncode == 0
     assert len((tmp_path / "args").read_text().splitlines()) == 1  # stub overwrites; see count below
     assert (tmp_path / "calls").read_text().count("\n") == 1
+
+
+def test_missing_ansible_playbook_is_bootstrapped_once_into_a_venv(tmp_path):
+    import shutil
+    if shutil.which("ansible-playbook"):
+        return  # a real one on PATH: nothing to bootstrap
+    py = tmp_path / "fakepy"
+    py.write_text('#!/bin/bash\n[ "$1" = "-c" ] && exit 0\nd="$3"\nmkdir -p "$d/bin"\n'
+                  'for t in pip ansible-galaxy; do printf "#!/bin/bash\\necho $t \\"\\$@\\" >> %s/log\\n" "$d/.." > "$d/bin/$t"; done\n'
+                  f'printf \'#!/bin/bash\\necho played >> {tmp_path}/played\\n\' > "$d/bin/ansible-playbook"\n'
+                  'chmod +x "$d"/bin/*\n')
+    py.chmod(0o755)
+    env = {**os.environ, "TMPDIR": str(tmp_path), "BUILD_NUMBER": "7", "HOST_JSON": json.dumps([HOST]),
+           "BOOTSTRAP_PYTHON": str(py)}
+    for _ in range(2):
+        r = subprocess.run(["bash", str(SCRIPT)], env=env, capture_output=True, text=True, cwd=tmp_path)
+        assert r.returncode == 0, r.stderr
+    assert (tmp_path / "played").read_text().count("played") == 2
+    venvs = list(tmp_path.glob("sumaform-ansible-venv-*"))
+    assert len([v for v in venvs if v.is_dir()]) == 1  # built once, reused by the second run
+    log = (tmp_path / "log").read_text()
+    assert log.count("pip") == 1 and log.count("ansible-galaxy") == 1
