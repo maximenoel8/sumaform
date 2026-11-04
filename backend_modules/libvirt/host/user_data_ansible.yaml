@@ -17,13 +17,15 @@ users:
 
 # SUSE images ship python3 and the qemu guest agent. The others do not, and with a bridge the libvirt provider
 # needs the agent to read the IP, so the domain would time out without it (Salt's user_data installs it too).
-# They also do not let root log in with the password (Ubuntu 24.04: PermitRootLogin defaults to prohibit-password;
-# Salt's user_data appends PermitRootLogin yes), and that password is the fallback login of ansible/inventory.py.
+# They also do not let root log in with the password (Ubuntu 24.04, Leap 16: PermitRootLogin defaults to
+# prohibit-password; Salt's user_data appends PermitRootLogin yes per image). That password is the fallback login of
+# ansible/inventory.py and the login of the Terraform provisioners (modules/dhcp_dns).
 package_update: ${install_guest_agent}
 packages:
   - python3
 %{ if install_guest_agent ~}
   - qemu-guest-agent
+%{ endif ~}
 # 00- sorts before 50-cloud-init.conf and 60-cloudimg-settings.conf: the first value of an option wins
 write_files:
   - path: /etc/ssh/sshd_config.d/00-sumaform.conf
@@ -31,6 +33,7 @@ write_files:
       PermitRootLogin yes
       PasswordAuthentication yes
 runcmd:
+%{ if install_guest_agent ~}
   - systemctl enable --now qemu-guest-agent
-  - systemctl restart ssh sshd || true
 %{ endif ~}
+  - systemctl restart ssh sshd || true

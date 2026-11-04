@@ -270,3 +270,10 @@ def test_repos_role_avoids_dict_method_names_and_creates_config_dirs():
 def test_non_suse_first_boot_allows_root_password_login():
     ud = (ROOT / "backend_modules/libvirt/host/user_data_ansible.yaml").read_text()
     assert "00-sumaform.conf" in ud and "PermitRootLogin yes" in ud
+
+
+def test_apt_hosts_refresh_metadata_after_the_repos_are_written():
+    cat = (A / "catalog" / "repos.yml").read_text()
+    assert "refresh_repos_apt" in cat and "apt-get -yq update" in cat
+    ud = (ROOT / "backend_modules/libvirt/host/user_data_ansible.yaml").read_text()
+    assert ud.count("00-sumaform.conf") == 1 and "%{ if install_guest_agent ~}\n# 00-" not in ud  # ssh drop-in is for every image

@@ -519,6 +519,12 @@ commands:
     cmd: "zypper --non-interactive --gpg-auto-import-keys refresh --force; exit 0"
     readonly: true
     applies: {pkg: [zypper], not_transactional: true}
+  # the deb repository list files were just written: without this the first install cannot see their packages
+  - name: refresh_repos_apt
+    phase: post
+    cmd: "DEBIAN_FRONTEND=noninteractive apt-get -yq update"
+    readonly: true
+    applies: {pkg: [apt]}
   - name: clean_repo_metadata
     phase: post
     cmd: yum clean metadata
