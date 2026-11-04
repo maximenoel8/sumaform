@@ -1,0 +1,88 @@
+---
+# salt/default/avahi.sls (+ the hosts_file_hack of hostname.sls). use_avahi false: mdns off and the daemon stopped.
+- name: Is there an nsswitch.conf
+  ansible.builtin.stat:
+    path: /etc/nsswitch.conf
+  register: _nsswitch
+
+- name: Avahi on
+  when: use_avahi | default(false) | bool
+  block:
+    - name: Avahi packages
+      ansible.builtin.include_role:
+        name: packages
+        tasks_from: install
+      vars:
+        install_packages: >-
+          {{ ['avahi-daemon', 'libavahi-common-data', 'libavahi-common3', 'libavahi-core7'] if ansible_facts.os_family == 'Debian'
+             else ['avahi', 'avahi-libs', 'nss-mdns'] if ansible_facts.os_family == 'RedHat'
+             else ['avahi', 'libavahi-common3', 'libavahi-core7'] }}
+      when: not (is_transactional | bool)
+
+    - name: Avahi domain
+      ansible.builtin.replace:
+        path: /etc/avahi/avahi-daemon.conf
+        regexp: "#domain-name=local"
+        replace: "domain-name={{ domain }}"
+      register: _avahi_domain
+
+    - name: Avahi ignores the extra interfaces
+      ansible.builtin.replace:
+        path: /etc/avahi/avahi-daemon.conf
+        regexp: "#deny-interfaces=eth1"
+        replace: "deny-interfaces=eth1,ens4"
+      register: _avahi_deny
+
+    # always off, https://github.com/lathiat/avahi/issues/110 (as in the Salt state)
+    - name: Avahi without IPv6
+      ansible.builtin.replace:
+        path: /etc/avahi/avahi-daemon.conf
+        regexp: "use-ipv6=yes"
+        replace: "use-ipv6=no"
+      register: _avahi_ipv6
+
+    - name: mdns allowed domains
+      ansible.builtin.lineinfile:
+        path: /etc/mdns.allow
+        line: "{{ item }}"
+        create: true
+        mode: "0644"
+      loop: [.local, .tf.local]
+
+    - name: nsswitch uses mdns4
+      ansible.builtin.replace:
+        path: /etc/nsswitch.conf
+        regexp: "(hosts: .*?)mdns([46]?)_minimal(.*)"
+        replace: '\1mdns4\3'
+      when: _nsswitch.stat.exists
+
+    - name: Avahi enabled and running
+      ansible.builtin.service:
+        name: avahi-daemon
+        state: "{{ 'restarted' if (_avahi_domain is changed or _avahi_deny is changed or _avahi_ipv6 is changed) else 'started' }}"
+        enabled: true
+
+    # real addresses in /etc/hosts when there is no DNS to resolve the host's own name
+    - name: Own name in /etc/hosts
+      ansible.builtin.script:
+        cmd: "set_ip_in_etc_hosts.py {{ '' if (ipv6 | default({})).get('enable', false) else '--no-ipv6' }} {{ hostname }} {{ domain }}"
+        executable: python3
+      changed_when: false
+
+- name: Avahi off
+  when: not (use_avahi | default(false) | bool)
+  block:
+    - name: nsswitch without mdns
+      ansible.builtin.replace:
+        path: /etc/nsswitch.conf
+        regexp: "(hosts: .*?)mdns([46]?)_minimal \\[NOTFOUND=return\\](.*)"
+        replace: '\1\3'
+      when: _nsswitch.stat.exists
+
+    - name: Avahi daemon stopped and disabled (where it exists)
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: stopped
+        enabled: false
+      loop: [avahi-daemon.service, avahi-daemon.socket]
+      failed_when: false

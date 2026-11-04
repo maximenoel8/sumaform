@@ -294,3 +294,17 @@ def test_templates_ported_from_salt_keep_salts_newline_handling():
 def test_zypper_installs_take_recommends_like_salt():
     t = (A / "roles" / "packages" / "tasks" / "install.yml").read_text()
     assert "community.general.zypper" in t and "disable_recommends: false" in t
+
+
+def test_base_ports_salt_time_sls_ntp_and_chrony():
+    t = (A / "roles" / "base" / "tasks" / "configure.yml").read_text()
+    assert "use_ntp" in t and "ntpd" in t and "chronyd" in t
+    for f in ("ntp.conf", "chrony.conf"):
+        assert (A / "roles" / "base" / "files" / f).read_bytes() == (ROOT / "salt" / "default" / f).read_bytes()
+
+
+def test_base_ports_salt_avahi_state():
+    c = (A / "roles" / "base" / "tasks" / "configure.yml").read_text()
+    t = (A / "roles" / "base" / "tasks" / "avahi.yml").read_text()
+    assert "avahi.yml" in c and "avahi-daemon" in t and "mdns4" in t and "use-ipv6=no" in t
+    assert (A / "roles" / "base" / "files" / "set_ip_in_etc_hosts.py").read_bytes() == (ROOT / "salt" / "default" / "set_ip_in_etc_hosts.py").read_bytes()

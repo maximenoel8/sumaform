@@ -4,10 +4,42 @@
   ansible.builtin.hostname:
     name: "{{ hostname | default(inventory_hostname) }}"
 
+- name: Avahi (use_avahi)
+  ansible.builtin.include_tasks: avahi.yml
+
 - name: Set timezone
   community.general.timezone:
     name: "{{ timezone }}"
   when: timezone is defined
+
+# salt/default/time.sls use_ntp (default true): Leap gets ntp, everything else chrony (already in the image on
+# transactional hosts). Both files are the Salt ones, byte for byte.
+- name: Time service
+  when: use_ntp | default(true) | bool
+  vars:
+    _ntp_leap: "{{ ansible_facts.distribution == 'openSUSE Leap' }}"
+    _ntp_unit: "{{ 'ntpd' if _ntp_leap | bool else 'chronyd' }}"
+  block:
+    - name: Install the time service
+      ansible.builtin.include_role:
+        name: packages
+        tasks_from: install
+      vars:
+        install_packages: ["{{ 'ntp' if _ntp_leap | bool else 'chrony' }}"]
+      when: not (is_transactional | bool)
+
+    - name: Time service configuration
+      ansible.builtin.copy:
+        src: "{{ 'ntp.conf' if _ntp_leap | bool else 'chrony.conf' }}"
+        dest: "{{ '/etc/ntp.conf' if _ntp_leap | bool else '/etc/chrony.conf' }}"
+        mode: "0644"
+      register: _time_conf
+
+    - name: Time service enabled and running
+      ansible.builtin.service:
+        name: "{{ _ntp_unit }}"
+        state: "{{ 'restarted' if _time_conf is changed else 'started' }}"
+        enabled: true
 
 - name: Disable the firewall
   ansible.builtin.service:
