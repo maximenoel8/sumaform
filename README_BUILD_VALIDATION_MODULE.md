@@ -57,6 +57,7 @@ Most nodes only require `mac` and `name`. Some have additional optional fields:
 | `server_containerized`, `proxy_containerized` | `image` (base OS image) |
 | `sles15sp5s390_minion`, `sles15sp5s390_sshminion` | `userid` (z/VM user ID) |
 | `monitoring_server` | optional `image` override |
+| `controller` | optional `memory`, `vcpu`, `server_http_proxy`, `custom_download_endpoint`, `no_auth_registry`, `auth_registry`, `auth_registry_username`, `auth_registry_password`. The last six are passed to the cucumber controller; when absent they are `null`, and the scenarios that need them are skipped |
 
 The map currently uses `name_prefix` as its BV-wide scalar. `product_version` is a separate module variable in `modules/build_validation/variables.tf`, and `url_prefix` is not consumed directly by the sumaform module.
 
